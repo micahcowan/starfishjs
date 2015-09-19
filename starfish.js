@@ -11,8 +11,23 @@ var Starfish = new (function () {
             throw "Generator.getPixel not overridden in " + this.toString();
         };
 
+        this.getAntialiasedValue = function(x, y) {
+            // FIXME: We probably want an adjustable antialiasing,
+            // rather than true/false.
+            var fudge = 0.5;
+            var value
+                = this.getValue(x, y)
+                + this.getValue(x+fudge, y)
+                + this.getValue(x, y+fudge)
+                + this.getValue(x+fudge, y+fudge);
+            return value / 4;
+        };
         this.getPixel = function(x, y, s) {
-            var value = this.getValue(x, y);
+            var value;
+            if (this.antialias)
+                value = this.getAntialiasedValue(x, y);
+            else
+                value = this.getValue(x, y);
             var pixel = [];
             for (var i = 0; i != s.bg.length; ++i) {
                 pixel.push(s.bg[i] + value * (s.fg[i] - s.bg[i]));

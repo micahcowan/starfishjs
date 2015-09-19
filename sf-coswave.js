@@ -2,6 +2,7 @@
 
 (function() {
     var coswave = Starfish.generators.Coswave = function(w, h) {
+        this.antialias = true;
         this.width = w;
         this.height = h;
         this.originH = Math.random();
