@@ -20,10 +20,13 @@
                 var canvas = document.getElementById("starfish");
                 var ctx = canvas.getContext("2d");
                 var w = canvas.width, h = canvas.height;
-                if (args.test) {
+                if (args.test && args.test in Starfish.generators) {
                     var layer = new Starfish.generators[args.test](w, h);
                     layer.drawToCanvas(ctx);
-                };
+                }
+                else {
+                    Starfish.drawToCanvas(ctx);
+                }
 
                 var body = document.getElementsByTagName("body")[0];
                 body.style.background = "url(" + canvas.toDataURL() + ")";

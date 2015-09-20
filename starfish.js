@@ -27,6 +27,8 @@
  */
 
 var Starfish = new (function () {
+    var MIN_LAYERS = 2;
+    var MAX_LAYERS = 6;
     this.generators = {};
 
     this.Generator = function() {
@@ -114,7 +116,7 @@ var Starfish = new (function () {
             for (var i = 0; i != s.bg.length; ++i) {
                 pixel.push(s.bg[i] + value * (s.fg[i] - s.bg[i]));
             }
-            pixel.push( 255 * s.alphaLayer.getAntialiasedValue(x, y) );
+            pixel.push( 255 * s.alphaLayer.getAntialiasedValue(hpos, vpos) );
             return pixel;
         };
         this.drawToImage = function(image /*imagedata*/, kwArgs) {
@@ -157,6 +159,14 @@ var Starfish = new (function () {
     this.white = [255, 255, 255];
     this.black = [0, 0, 0];
 
+    this.randomColor = function() {
+        var color = [];
+        for (var i=0; i != 3; ++i) {
+            color.push( Math.floor( Math.random() * 256 ) );
+        }
+        return color;
+    };
+
     var OpaqueLayer = function() {
         this.getValue = function() {
             return 1;
@@ -164,6 +174,26 @@ var Starfish = new (function () {
     };
     OpaqueLayer.prototype = new this.Generator;
     this.opaque = new OpaqueLayer;
+
+    this.randomLayer = function(w, h) {
+        var keys = Object.keys(this.generators);
+        var choice = Math.floor( Math.random() * keys.length );
+        var gen = this.generators[ keys[choice] ];
+        return new gen(w, h);
+    };
+
+
+    // LayerInverter
+    this.invertLayer = function(layer) {
+        var TempClass = function() {
+            var origGetValue = this.getValue;
+            this.getValue = function(h, v) {
+                return 1 - origGetValue.call(this, h, v);
+            };
+        };
+        TempClass.prototype = layer;
+        return new TempClass;
+    };
 
     // packedCos methods
     this.packedCos = {
@@ -201,5 +231,51 @@ var Starfish = new (function () {
         var keys = Object.keys(this.packedCos);
         var choice = Math.floor( Math.random() * keys.length );
         return this.packedCos[ keys[choice] ];
+    };
+
+    // Make a starfish!
+    this.drawToCanvas = function(ctx) {
+        var numLayers = MIN_LAYERS + Math.floor(
+            Math.random() * (1 + MAX_LAYERS - MIN_LAYERS)
+        );
+
+        // Initialize the canvas to black.
+        ctx.beginPath();
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        while (numLayers-- > 0) {
+            // First, create a brand new canvas to draw a single layer into.
+            var layerCanvas = document.createElement('canvas');
+            layerCanvas.width = ctx.canvas.width;
+            layerCanvas.height = ctx.canvas.height;
+            var layerContext = layerCanvas.getContext('2d');
+            var fg = this.randomColor();
+            var bg = this.randomColor();
+
+            // Create a random layer.
+            var layer = this.randomLayer(ctx.canvas.width, ctx.canvas.height);
+
+            // Are we just going to use the layer as its own alpha mask?
+            // Or do we create an entirely new layer for an alpha?
+            var alphaLayer;
+
+            if (Math.random() < 0.5)
+                alphaLayer = layer;
+            else
+                alphaLayer = this.randomLayer(ctx.canvas.width, ctx.canvas.height);
+
+            // Are we going to use that layer as-is, or inverted?
+            if (Math.random() < 0.5)
+                alphaLayer = new this.invertLayer(alphaLayer);
+
+            layer.drawToCanvas(layerContext, {
+                fg: fg
+              , bg: bg
+              , alphaLayer: alphaLayer
+            });
+
+            ctx.drawImage(layerCanvas, 0, 0);
+        }
     };
 });
