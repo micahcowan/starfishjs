@@ -4,13 +4,14 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <script src="starfish.js" type="text/javascript"></script>
         <script src="sf-coswave.js" type="text/javascript"></script>
+        <script src="sf-spinflake.js" type="text/javascript"></script>
         <script type="text/javascript">
             // @license magnet:?xt=urn:btih:90dc5c0be029de84e523b9b3922520e79e0e6f08&dn=cc0.txt CC0
             function drawIt() {
                 var canvas = document.getElementById("starfish");
                 var ctx = canvas.getContext("2d");
                 var w = canvas.width, h = canvas.height;
-                var layer = new Starfish.generators.Coswave(w, h);
+                var layer = new Starfish.generators.Spinflake(w, h);
                 layer.drawToCanvas(ctx);
 
                 var body = document.getElementsByTagName("body")[0];

@@ -177,24 +177,24 @@ var Starfish = new (function () {
            when new pack methods are devised, they can be added to the
            entire Starfish generator set simply by placing them in here.
          */
-        flipSignToFit: function(distance, scale) {
+        flipSignToFit: function(theta) {
             // When the scale goes negative, turn it positive.
-            var rawcos = Math.cos(distance * scale);
+            var rawcos = Math.cos(theta);
             return (rawcos >= 0) ? rawcos : -rawcos;
         }
-      , truncateToFit: function(distance, scale) {
+      , truncateToFit: function(theta) {
             // When the scale goes negative, add 1 to it to bring it in range.
-            var rawcos = Math.cos(distance * scale);
+            var rawcos = Math.cos(theta);
             return (rawcos >= 0) ? rawcos : rawcos + 1;
         }
-      , scaleToFit: function(distance, scale) {
+      , scaleToFit: function(theta) {
             // Compress the -1..0..1 range of the normal cosine into 0..1
-            var rawcos = Math.cos(distance * scale);
+            var rawcos = Math.cos(theta);
             return (rawcos + 1) / 2;
         }
-      , slopeToFit: function(distance, scale) {
+      , slopeToFit: function(theta) {
             // Use only the first half of the cycle. A saw-edge effect.
-            return (Math.cos((distance * scale % Math.PI)) + 1) / 2;
+            return (Math.cos(theta % Math.PI) + 1) / 2;
         }
     };
     this.randomPackMethod = function() {

@@ -24,6 +24,16 @@
    @licend  The above is the entire license notice
    for the JavaScript code in this page.
 
+   Coswave
+   This is the original texture from Starfish's venerable ancestor.
+   This was cool enough by itself, but when you combine it with the
+   trippy-cool edge wrapping code in starfish, it creates *really*
+   neat turbulent lumpy patterns. Very smooth.
+   This is an astonishingly versatile generator, as the simplest
+   formulae often are.
+   OK, *I* think it's cool.
+
+   Stop laughing already.
  */
 
 (function() {
@@ -106,7 +116,7 @@
             hypotenuse = Math.sqrt(hpos * hpos * sq * sq, vpos * vpos / (sq * sq));
             compwavescale = this.getWaveScale(hypotenuse);
 
-            return this.packedCos(hypotenuse, compwavescale);
+            return this.packedCos(hypotenuse * compwavescale);
         };
         this.getWaveScale = function(hyp) {
             return this.wavescale;
