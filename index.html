@@ -18,8 +18,20 @@
             window.addEventListener('load', drawIt);
         </script>
         <style type="text/css">
-            body { background: #ccf }
-            #starfish { border: solid 0.5em navy }
+            @keyframes background-drift {
+                from { background-position: 0 0 }
+                to   { background-position: 384px 384px}
+            }
+            body {
+                background: #ccf;
+                animation-name: background-drift;
+                animation-duration: 32s;
+                animation-iteration-count: infinite;
+                animation-timing-function: linear;
+            }
+            #starfish {
+                border: solid 0.5em navy;
+            }
         </style>
     </head>
     <body>
