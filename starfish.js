@@ -7,32 +7,88 @@ var Starfish = new (function () {
     };
     this.Generator.prototype = new (function() {
         // MUST be overridden by descendants:
-        this.getValue = function(x, y) {
+        // (hpos and vpos are in the range 0 - 1)
+        this.getValue = function(hpos, vpos) {
             throw "Generator.getPixel not overridden in " + this.toString();
         };
 
-        this.getAntialiasedValue = function(x, y) {
+        this.getWrappedValue = function(hpos, vpos) {
+            if (!this.smoothOutSeams) return this.getValue(hpos, vpos);
+
+            /*
+               Get a point from this function.
+               But don't just get the point - also get some out-of-band values
+               and mix them in proportionately. This results in a
+               seamlessly wrapped texture, where you can't see the edges.
+
+               Some functions do this on their own; if that's
+               the case, we let it do it.  Otherwise, we do the
+               computations ourself.
+             */
+            var value = this.getValue(hpos, vpos);
+            /*
+               If this function does not generate seamlessly-tiled textures,
+               then it is our job to pull in out-of-band data and mix it in
+               with the actual pixel to get a smooth edge.
+             */
+            if (this.smoothOutSeams) {
+                /*
+                   We mix this pixel with out-of-band values from the
+                   opposite side of the tile. This is a "weighted
+                   average" proportionate to the pixel's distance from
+                   the edge of the tile. This creates a smoothly fading
+                   transition from one side of the texture to the other
+                   when the edges are tiled together.
+                 */
+                var farh, farv;
+                var farval1, farval2, farval3;
+                var totalweight, weight, farweight1, farweight2, farweight3;
+                //The farh and farv are on the opposite side of the tile.
+                farh = hpos + 1.0;
+                farv = vpos + 1.0;
+                //There are three pixel values to grab off the edges.
+                farval1 = this.getValue(hpos, farv);
+                farval2 = this.getValue(farh, vpos);
+                farval3 = this.getValue(farh, farv);
+                //Calculate the weight factors for each far point.
+                weight = hpos * vpos;
+                farweight1 = hpos * (2.0 - farv);
+                farweight2 = (2.0 - farh) * vpos;
+                farweight3 = (2.0 - farh) * (2.0 - farv);
+                totalweight = weight + farweight1 + farweight2 + farweight3;
+                //Now average all the pixels together, weighting each
+                //one by the local vs far weights.
+                value = ((value * weight) + (farval1 * farweight1)
+                         + (farval2 * farweight2) + (farval3 * farweight3))
+                         / totalweight;
+            }
+
+            return value;
+        };
+        this.getAntialiasedValue = function(hpos, vpos) {
             // FIXME: We probably want an adjustable antialiasing,
             // rather than true/false.
-            var fudge = 0.5;
+            var fudge = 1 / (this.width + this.height);
             var value
-                = this.getValue(x, y)
-                + this.getValue(x+fudge, y)
-                + this.getValue(x, y+fudge)
-                + this.getValue(x+fudge, y+fudge);
+                = this.getWrappedValue(hpos, vpos);
+
+            if (!this.antialias) return value;
+
+            value = value
+                + this.getWrappedValue(hpos+fudge, vpos)
+                + this.getWrappedValue(hpos, vpos+fudge)
+                + this.getWrappedValue(hpos+fudge, vpos+fudge);
             return value / 4;
         };
         this.getPixel = function(x, y, s) {
-            var value;
-            if (this.antialias)
-                value = this.getAntialiasedValue(x, y);
-            else
-                value = this.getValue(x, y);
+            var hpos = x/this.width;
+            var vpos = y/this.height;
+            var value = this.getAntialiasedValue(hpos, vpos);
             var pixel = [];
             for (var i = 0; i != s.bg.length; ++i) {
                 pixel.push(s.bg[i] + value * (s.fg[i] - s.bg[i]));
             }
-            pixel.push( 255 * s.alphaLayer.getValue(x, y) );
+            pixel.push( 255 * s.alphaLayer.getAntialiasedValue(x, y) );
             return pixel;
         };
         this.drawToImage = function(image /*imagedata*/, kwArgs) {

@@ -3,8 +3,11 @@
 (function() {
     var coswave = Starfish.generators.Coswave = function(w, h) {
         this.antialias = true;
+        this.smoothOutSeams = true;
+
         this.width = w;
         this.height = h;
+
         this.originH = Math.random();
         this.originV = Math.random();
         this.packedCos = Starfish.randomPackMethod();
@@ -58,25 +61,23 @@
         this.distortion = 0.5 + (Math.random() * 1.5);
     };
     var coswaveProtoClass = function() {
-        this.getValue = function(x, y) {
+        this.getValue = function(hpos, vpos) {
             var hypotenuse, hypangle;
             var rawcos, compwavescale;
             // Rotate the axes of this shape.
-            x = x / this.width;
-            y = y / this.height;
-            x -= this.originH;
-            y -= this.originV;
+            hpos -= this.originH;
+            vpos -= this.originV;
             hypangle = Math.atan(
-                (y / x) * this.distortion
+                (vpos / hpos) * this.distortion
                 + this.sqangle
             );
-            hypotenuse = Math.sqrt(x*x + y*y);
-            x = (Math.cos(hypangle) * hypotenuse);
-            y = (Math.sin(hypangle) * hypotenuse);
+            hypotenuse = Math.sqrt(hpos*hpos + vpos*vpos);
+            hpos = (Math.cos(hypangle) * hypotenuse);
+            vpos = (Math.sin(hypangle) * hypotenuse);
             // Calculate the squished distance from the origin to the
             // desired point.
             var sq = this.squish;
-            hypotenuse = Math.sqrt(x * x * sq * sq, y * y / (sq * sq));
+            hypotenuse = Math.sqrt(hpos * hpos * sq * sq, vpos * vpos / (sq * sq));
             compwavescale = this.getWaveScale(hypotenuse);
 
             return this.packedCos(hypotenuse, compwavescale);

@@ -11,6 +11,9 @@
                 var w = canvas.width, h = canvas.height;
                 var layer = new Starfish.generators.Coswave(w, h);
                 layer.drawToCanvas(ctx);
+
+                var body = document.getElementsByTagName("body")[0];
+                body.style.background = "url(" + canvas.toDataURL() + ")";
             }
             window.addEventListener('load', drawIt);
         </script>
@@ -20,6 +23,6 @@
         </style>
     </head>
     <body>
-        <canvas id="starfish" width="640" height="480" />
+        <canvas id="starfish" width="384" height="384" />
     <body>
 </html>
