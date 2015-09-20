@@ -8,16 +8,32 @@
         <script type="text/javascript">
             // @license magnet:?xt=urn:btih:90dc5c0be029de84e523b9b3922520e79e0e6f08&dn=cc0.txt CC0
             function drawIt() {
+                var args = {};
+                window.location.hash.replace(/^#!/,'').split('&')
+                        .forEach(function(arg) {
+                    var s = arg.split('=', 2);
+                    if (s.length == 2)
+                        args[s[0]] = s[1];
+                    else
+                        args[s[0]] = true;
+                });
                 var canvas = document.getElementById("starfish");
                 var ctx = canvas.getContext("2d");
                 var w = canvas.width, h = canvas.height;
-                var layer = new Starfish.generators.Spinflake(w, h);
-                layer.drawToCanvas(ctx);
+                if (args.test) {
+                    var layer = new Starfish.generators[args.test](w, h);
+                    layer.drawToCanvas(ctx);
+                };
 
                 var body = document.getElementsByTagName("body")[0];
                 body.style.background = "url(" + canvas.toDataURL() + ")";
             }
-            window.addEventListener('load', drawIt);
+            function start() {
+                var refreshLink = document.getElementById('refresh-link');
+                refreshLink.addEventListener('click', drawIt);
+                drawIt();
+            }
+            window.addEventListener('load', start);
             // @license-end
         </script>
         <style type="text/css">
@@ -34,10 +50,18 @@
             }
             #starfish {
                 border: solid 0.5em navy;
+                //float: left;
+            }
+            p {
+                background-color: rgba(255,255,255,0.7);
+                font-weight: 500;
+                padding: 0.25em;
+                width: 384px;
             }
         </style>
     </head>
     <body>
+        <p>Click <a href="javascript:void(0);" id="refresh-link">here</a> to try a fresh pattern.</p>
         <canvas id="starfish" width="384" height="384" />
     <body>
 </html>
