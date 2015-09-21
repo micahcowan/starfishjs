@@ -81,6 +81,9 @@
             var level = this.level = Array(VALMATRIX_SIZE * VALMATRIX_SIZE);
             data.get = level.get = get;
             data.set = level.set = set;
+            var trueMin = 1;
+            var trueMax = 0;
+            var threshold = 0.25;
             for (var i = 0; i != this.level.length; ++i)
                 this.level[i] = 0;
             for (var step = VALMATRIX_SIZE / 2;
@@ -96,36 +99,28 @@
                             var max = 0;
                             var min = 1;
                             var dirs = [-step, 0, step];
-                            dirs.forEach(function(hp) {
-                                dirs.forEach(function(vp) {
-                                    var val = data.get(
-                                        wrapC(h + hp),
-                                        wrapC(v + vp)
-                                    );
-                                    if (val < min) min = val;
-                                    if (val > max) max = val;
-                                });
-                            });
-                            var val = min + Math.random() * (max-min);
-                            if (step >= VALMATRIX_SIZE / 2) {
-                                /*
-                                   The first pieces of data are always
-                                   picked completely at random, because
-                                   they have no neighbors to influence
-                                   their decisions.  But these data are
-                                   the extremes of the image - no values
-                                   can be any larger or smaller than
-                                   them. So we "push" them out a little
-                                   bit by rounding them to integer
-                                   values, then averaging them with
-                                   their original values. This gives us
-                                   whiter whites and blacker blacks,
-                                   without forcing the first data to be
-                                   pure white or black.
-                               */
-                               var valint = (val > 0.5)? 1 : 0;
-                               val = (valint + val) / 2;
+                            if (trueMin > trueMax
+                                || trueMax - trueMin < threshold) {
+
+                                // We don't have enough contrast yet,
+                                // so we won't constrict the values to
+                                // our neighbors.
                             }
+                            else {
+                                dirs.forEach(function(hp) {
+                                    dirs.forEach(function(vp) {
+                                        var val = data.get(
+                                            wrapC(h + hp),
+                                            wrapC(v + vp)
+                                        );
+                                        if (val < min) min = val;
+                                        if (val > max) max = val;
+                                    });
+                                });
+                            }
+                            var val = min + Math.random() * (max-min);
+                            if (val < trueMin) trueMin = val;
+                            if (val > trueMax) trueMax = val;
                             this.data.set(h,v,val);
                             this.level.set(h,v,step);
                         }
