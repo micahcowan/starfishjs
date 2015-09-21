@@ -109,17 +109,12 @@
                             else {
                                 dirs.forEach(function(hp) {
                                     dirs.forEach(function(vp) {
-                                        if (level.get(
-                                                wrapC(h+hp),
-                                                wrapC(v+vp)
-                                              ) > step) {
-                                            var val = data.get(
-                                                wrapC(h + hp),
-                                                wrapC(v + vp)
-                                            );
-                                            if (val < min) min = val;
-                                            if (val > max) max = val;
-                                        }
+                                        var val = data.get(
+                                            wrapC(h + hp),
+                                            wrapC(v + vp)
+                                        );
+                                        if (val < min) min = val;
+                                        if (val > max) max = val;
                                     });
                                 });
                             }
