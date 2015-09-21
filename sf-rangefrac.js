@@ -87,8 +87,8 @@
             for (var i = 0; i != this.level.length; ++i)
                 this.level[i] = 0;
             for (var step = VALMATRIX_SIZE / 2;
-                 step > 0;
-                 step = Math.floor(step / 2)) {
+                 step >= 1;
+                 step = step / 2) {
 
                 for (var v = 0; v < VALMATRIX_SIZE; v += step) {
                     for (var h = 0; h < VALMATRIX_SIZE; h += step) {
@@ -113,6 +113,8 @@
                                             wrapC(h + hp),
                                             wrapC(v + vp)
                                         );
+                                        if (val === undefined)
+                                            return;
                                         if (val < min) min = val;
                                         if (val > max) max = val;
                                     });
@@ -166,7 +168,9 @@
             totalsum += (localval * localweight);
             totalweight += localweight;
             //TAKE AVERAGE
-            return this.getMatrixVal(smallH, smallV);
+            if (false) // set to true for pixelation
+                return this.getMatrixVal(smallH, smallV);
+            return totalsum / totalweight;
         };
 
         this.getMatrixVal = function(matrixh, matrixv) {
