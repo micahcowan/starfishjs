@@ -62,6 +62,15 @@
             while (coord < 0) coord += VALMATRIX_SIZE;
             return coord;
         }
+        // WARNING: modifies input (reducing it to empty).
+        function shuffler(input) {
+            var out = [];
+            while (input.length) {
+                var i = Math.floor(Math.random() * input.length);
+                out.push(input.splice(i,1)[0]);
+            }
+            return out;
+        }
         this.generateFractal = function() {
             /*
                Walk through the matrix.
@@ -90,43 +99,53 @@
                  step >= 1;
                  step = step / 2) {
 
+                // Shuffle all the coordinates we're going to set;
+                // otherwise we get a strong bias on the initial pixels
+                // we create, causing seam-like bands.
+                var coords = [];
                 for (var v = 0; v < VALMATRIX_SIZE; v += step) {
                     for (var h = 0; h < VALMATRIX_SIZE; h += step) {
-                        // See if we need to calculate this pixel at all.
-                        if (this.level.get(h, v) < step) {
-                            // Go hunting for the highest and lowest
-                            // values among this pixel's neighbors.
-                            var max = 0;
-                            var min = 1;
-                            var dirs = [-step, 0, step];
-                            if (trueMin > trueMax
-                                || trueMax - trueMin < threshold) {
+                        coords.push([h, v]);
+                    }
+                }
+                coords = shuffler(coords);
+                for (var i = 0; i != coords.length; ++i) {
+                    var h = coords[i][0]
+                    var v = coords[i][1];
+                    // See if we need to calculate this pixel at all.
+                    if (this.level.get(h, v) < step) {
+                        // Go hunting for the highest and lowest
+                        // values among this pixel's neighbors.
+                        var max = 0;
+                        var min = 1;
+                        var dirs = [-step, 0, step];
+                        if (trueMin > trueMax
+                            || trueMax - trueMin < threshold) {
 
-                                // We don't have enough contrast yet,
-                                // so we won't constrict the values to
-                                // our neighbors.
-                            }
-                            else {
-                                dirs.forEach(function(hp) {
-                                    dirs.forEach(function(vp) {
-                                        if (hp == 0 && vp == 0) return;
-                                        // ^ (that's this pixel)
-                                        var hq = wrapC(h + hp);
-                                        var vq = wrapC(v + vp);
-                                        var val = data.get(hq, vq);
-                                        if (val === undefined)
-                                            return;
-                                        if (val < min) min = val;
-                                        if (val > max) max = val;
-                                    });
-                                });
-                            }
-                            var val = min + Math.random() * (max-min);
-                            if (val < trueMin) trueMin = val;
-                            if (val > trueMax) trueMax = val;
-                            this.data.set(h,v,val);
-                            this.level.set(h,v,step);
+                            // We don't have enough contrast yet,
+                            // so we won't constrict the values to
+                            // our neighbors.
                         }
+                        else {
+                            dirs.forEach(function(hp) {
+                                dirs.forEach(function(vp) {
+                                    if (hp == 0 && vp == 0) return;
+                                    // ^ (that's this pixel)
+                                    var hq = wrapC(h + hp);
+                                    var vq = wrapC(v + vp);
+                                    var val = data.get(hq, vq);
+                                    if (val === undefined)
+                                        return;
+                                    if (val < min) min = val;
+                                    if (val > max) max = val;
+                                });
+                            });
+                        }
+                        var val = min + Math.random() * (max-min);
+                        if (val < trueMin) trueMin = val;
+                        if (val > trueMax) trueMax = val;
+                        this.data.set(h,v,val);
+                        this.level.set(h,v,step);
                     }
                 }
             }
