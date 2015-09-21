@@ -18,6 +18,16 @@
                         args[s[0]] = true;
                 });
                 var canvas = document.getElementById("starfish");
+                if (args.width) {
+                    var w = args.width;
+                    var h;
+                    if (args.height)
+                        h = args.height;
+                    else
+                        h = args.width;
+                    canvas.width = w;
+                    canvas.height = h;
+                }
                 var ctx = canvas.getContext("2d");
                 var w = canvas.width, h = canvas.height;
                 if (args.test && args.test in Starfish.generators) {
