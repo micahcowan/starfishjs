@@ -7,6 +7,10 @@
         <script src="sf-spinflake.js" type="text/javascript"></script>
         <script type="text/javascript">
             // @license magnet:?xt=urn:btih:90dc5c0be029de84e523b9b3922520e79e0e6f08&dn=cc0.txt CC0
+            if (!window.location.hash) {
+                window.location.hash = "#!width=384";
+            }
+
             function drawIt() {
                 var args = {};
                 window.location.hash.replace(/^#!/,'').split('&')
@@ -14,7 +18,7 @@
                     var s = arg.split('=', 2);
                     if (s.length == 2)
                         args[s[0]] = s[1];
-                    else
+                    else if (s[0])
                         args[s[0]] = true;
                 });
                 var canvas = document.getElementById("starfish");
@@ -73,16 +77,39 @@
             #starfish {
                 visibility: hidden;
             }
-            p {
+            div {
                 background-color: rgba(255,255,255,0.7);
                 font-weight: 500;
                 padding: 0.25em;
                 width: 384px;
+                font: 0.8em sans-serif;
+                margin-bottom: 0.50em;
+            }
+            .smaller {
+                font-size: 0.8em;
             }
         </style>
     </head>
     <body>
-        <p>Click <a href="javascript:void(0);" id="refresh-link">here</a> to try a fresh pattern.</p>
+        <div>
+        <p><strong>Click <a href="javascript:void(0);"
+            id="refresh-link">here</a> to try a fresh pattern (and then
+        wait several seconds).</strong></p>
+
+        <p>This is StarfishJS, a JavaScript port of Starfish, which
+        randomly generates a beautiful new wallpaper whenever you ask it
+        to.</p>
+
+        <p class="smaller">The original Starfish program was written in
+        C by <a href="mailto:mars@redecho.org">Mars Saxman</a>;
+        <br />
+        The version you are now viewing was translated to JavaScript by
+        <a href="mailto:micah@addictivecode.org">Micah Cowan</a>.</p>
+
+        <p>The source repository for StarfishJS is <a
+            href="https://github.com/micahcowan/starfishjs">here</a></p>
+        </div>
+
         <img id="starfish-img" />
         <canvas id="starfish" width="384" height="384" />
     <body>
