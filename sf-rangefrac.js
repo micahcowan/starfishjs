@@ -109,10 +109,11 @@
                             else {
                                 dirs.forEach(function(hp) {
                                     dirs.forEach(function(vp) {
-                                        var val = data.get(
-                                            wrapC(h + hp),
-                                            wrapC(v + vp)
-                                        );
+                                        if (hp == 0 && vp == 0) return;
+                                        // ^ (that's this pixel)
+                                        var hq = wrapC(h + hp);
+                                        var vq = wrapC(v + vp);
+                                        var val = data.get(hq, vq);
                                         if (val === undefined)
                                             return;
                                         if (val < min) min = val;
@@ -141,7 +142,8 @@
              */
             var totalweight = 0;
             var totalsum = 0;
-            tweaker = 0.5 / VALMATRIX_SIZE;
+            var tweaker = 0.5 / VALMATRIX_SIZE;
+            tweaker = 0;
             var smallH = Math.floor(h * VALMATRIX_SIZE - tweaker);
             var smallV = Math.floor(v * VALMATRIX_SIZE - tweaker);
             var bigH = smallH + 1;
