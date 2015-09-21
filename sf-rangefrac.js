@@ -105,10 +105,16 @@
                 var coords = [];
                 for (var v = 0; v < VALMATRIX_SIZE; v += step) {
                     for (var h = 0; h < VALMATRIX_SIZE; h += step) {
-                        coords.push([h, v]);
+                        if (this.level.get(h, v) < step) {
+                            // Avoid slowing down shuffling with
+                            // coordinates we plan to discard anyway.
+                            coords.push([h, v]);
+                        }
                     }
                 }
-                coords = shuffler(coords);
+                // Avoid shuffling when |coords| is large.
+                if (step > 1)
+                    coords = shuffler(coords);
                 for (var i = 0; i != coords.length; ++i) {
                     var h = coords[i][0]
                     var v = coords[i][1];
