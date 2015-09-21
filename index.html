@@ -39,7 +39,12 @@
                 }
 
                 var body = document.getElementsByTagName("body")[0];
-                body.style.background = "url(" + canvas.toDataURL() + ")";
+                var data = canvas.toDataURL();
+                body.style.background = "url(" + data + ")";
+
+                // draw to image
+                var img = document.getElementById("starfish-img");
+                img.src = data;
             }
             function start() {
                 var refreshLink = document.getElementById('refresh-link');
@@ -61,9 +66,12 @@
                 animation-iteration-count: infinite;
                 animation-timing-function: linear;
             }
-            #starfish {
+            #starfish, #starfish-img {
                 border: solid 0.5em navy;
                 //float: left;
+            }
+            #starfish {
+                visibility: hidden;
             }
             p {
                 background-color: rgba(255,255,255,0.7);
@@ -75,6 +83,7 @@
     </head>
     <body>
         <p>Click <a href="javascript:void(0);" id="refresh-link">here</a> to try a fresh pattern.</p>
+        <img id="starfish-img" />
         <canvas id="starfish" width="384" height="384" />
     <body>
 </html>

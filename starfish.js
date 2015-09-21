@@ -238,11 +238,14 @@ var Starfish = new (function () {
         var numLayers = MIN_LAYERS + Math.floor(
             Math.random() * (1 + MAX_LAYERS - MIN_LAYERS)
         );
+        var startLayers = numLayers;
 
         // Initialize the canvas to black.
         ctx.beginPath();
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        var startTime = (new Date).valueOf();
 
         while (numLayers-- > 0) {
             // First, create a brand new canvas to draw a single layer into.
@@ -276,6 +279,11 @@ var Starfish = new (function () {
             });
 
             ctx.drawImage(layerCanvas, 0, 0);
+
+            // Break out early if we're on a slow device (mobile phone,
+            // etc?) and have more than 2 layers
+            if ((new Date) - startTime > 5000 && startLayers - numLayers >= MIN_LAYERS)
+                break;
         }
     };
 });
