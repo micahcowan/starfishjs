@@ -62,15 +62,6 @@
             while (coord < 0) coord += VALMATRIX_SIZE;
             return coord;
         }
-        // WARNING: modifies input (reducing it to empty).
-        function shuffler(input) {
-            var out = [];
-            while (input.length) {
-                var i = Math.floor(Math.random() * input.length);
-                out.push(input.splice(i,1)[0]);
-            }
-            return out;
-        }
         this.generateFractal = function() {
             /*
                Walk through the matrix.
@@ -112,12 +103,21 @@
                         }
                     }
                 }
-                // Avoid shuffling when |coords| is large.
-                if (step > 1)
-                    coords = shuffler(coords);
-                for (var i = 0; i != coords.length; ++i) {
-                    var h = coords[i][0]
-                    var v = coords[i][1];
+                while (coords.length) {
+                    var hv;
+                    if (step > 1) {
+                        // Shuffle points to minimize bias in starting row
+                        var i = Math.floor(Math.random() * coords.length);
+                        hv = coords.splice(i,1)[0];
+                    }
+                    else {
+                        // When we get down to the individual node level,
+                        // shuffling is both of minimal use and of
+                        // maximum cost. Avoid.
+                        hv = coords.pop();
+                    }
+                    var h = hv[0]
+                    var v = hv[1];
                     // See if we need to calculate this pixel at all.
                     if (this.level.get(h, v) < step) {
                         // Go hunting for the highest and lowest
