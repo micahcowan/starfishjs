@@ -234,11 +234,17 @@ var Starfish = new (function () {
     };
 
     // Make a starfish!
-    this.drawToCanvas = function(ctx) {
+    this.drawToCanvas = function(ctx, kwArgs) {
+        var messaged = false;
         var numLayers = MIN_LAYERS + Math.floor(
             Math.random() * (1 + MAX_LAYERS - MIN_LAYERS)
         );
         var startLayers = numLayers;
+        if (!kwArgs) {
+            kwArgs = {};
+        }
+        if (!('timeout' in kwArgs))
+            kwArgs.timeout = true;
 
         // Initialize the canvas to black.
         ctx.beginPath();
@@ -282,8 +288,16 @@ var Starfish = new (function () {
 
             // Break out early if we're on a slow device (mobile phone,
             // etc?) and have more than 2 layers
-            if ((new Date) - startTime > 5000 && startLayers - numLayers >= MIN_LAYERS)
-                break;
+            if (!messaged && numLayers > 0 && (new Date) - startTime > 5000 && startLayers - numLayers >= MIN_LAYERS) {
+                messaged = true;
+                if (kwArgs.timeout) {
+                    console.log("Timeout reached")
+                    break;
+                }
+                else {
+                    console.log("Timeout reached, but continuing anyway.");
+                }
+            }
         }
     };
 });

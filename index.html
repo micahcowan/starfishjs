@@ -10,7 +10,7 @@
         <script type="text/javascript">
             // @license magnet:?xt=urn:btih:90dc5c0be029de84e523b9b3922520e79e0e6f08&dn=cc0.txt CC0
             if (!window.location.hash) {
-                window.location.hash = "#!width=384";
+                window.location.hash = "#!size=384";
             }
 
             function drawIt() {
@@ -24,13 +24,14 @@
                         args[s[0]] = true;
                 });
                 var canvas = document.getElementById("starfish");
-                if (args.width) {
-                    var w = args.width;
+                if (args.size) {
+                    var dimens = args.size.split('x', 2);
+                    var w = dimens[0];
                     var h;
-                    if (args.height)
-                        h = args.height;
+                    if (dimens[1])
+                        h = dimens[1];
                     else
-                        h = args.width;
+                        h = w;
                     canvas.width = w;
                     canvas.height = h;
                 }
@@ -41,7 +42,10 @@
                     layer.drawToCanvas(ctx);
                 }
                 else {
-                    Starfish.drawToCanvas(ctx);
+                    var config = {};
+                    if ('timeout' in args && args.timeout.match(/^no$/i))
+                        config.timeout = false;
+                    Starfish.drawToCanvas(ctx, config);
                 }
 
                 var body = document.getElementsByTagName("body")[0];
