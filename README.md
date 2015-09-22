@@ -1,5 +1,9 @@
 # StarfishJS
-An HTML5/JavaScript port of my friend marssaxman's C code to generate beautiful, tiled, procedurally-generated background images. [Try it out here!](http://micah.cowan.name/starfishjs/)
+An HTML5/JavaScript port of my friend [Mars Saxman](http://redecho.org/)'s C program [Starfish][] to generate beautiful, tiled, procedurally-generated background images. [Try it out here!](http://micah.cowan.name/starfishjs/)
+
+  [starfish]: https://packages.debian.org/stable/xstarfish
+
+StarfishJS (like its C predecesor) is Free/Libre Software, and is licensed under the [GNU GPL](LICENSE.txt) (version 3 or later).
 
 ### Samples ###
 ![Test Image: "Turvey Green Cream Dunes"](turvey-green-cream-dunes.png)
