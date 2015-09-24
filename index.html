@@ -42,10 +42,8 @@
                     layer.drawToCanvas(ctx);
                 }
                 else {
-                    var config = {};
-                    if ('timeout' in args && args.timeout.match(/^no$/i))
-                        config.timeout = false;
-                    Starfish.drawToCanvas(ctx, config);
+                    instance = new Starfish.Instance;
+                    instance.render(ctx);
                 }
 
                 var body = document.getElementsByTagName("body")[0];

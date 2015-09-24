@@ -37,12 +37,9 @@
  */
 
 (function() {
-    var coswave = Starfish.generators.Coswave = function(w, h) {
+    var coswave = Starfish.generators.Coswave = function() {
         this.antialias = true;
         this.smoothOutSeams = true;
-
-        this.width = w;
-        this.height = h;
 
         this.originH = Math.random();
         this.originV = Math.random();

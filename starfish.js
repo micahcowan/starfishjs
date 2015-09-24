@@ -27,6 +27,7 @@
  */
 
 var Starfish = new (function () {
+    var Starfish = this;
     var MIN_LAYERS = 2;
     var MAX_LAYERS = 6;
     this.generators = {};
@@ -93,30 +94,28 @@ var Starfish = new (function () {
 
             return value;
         };
-        this.getAntialiasedValue = function(hpos, vpos) {
+        this.getAntialiasedValue = function(hpos, vpos, pixw, pixh) {
             // FIXME: We probably want an adjustable antialiasing,
             // rather than true/false.
-            var fudge = 1 / (this.width + this.height);
             var value
                 = this.getWrappedValue(hpos, vpos);
 
             if (!this.antialias) return value;
 
             value = value
-                + this.getWrappedValue(hpos+fudge, vpos)
-                + this.getWrappedValue(hpos, vpos+fudge)
-                + this.getWrappedValue(hpos+fudge, vpos+fudge);
+                + this.getWrappedValue(hpos+pixw, vpos)
+                + this.getWrappedValue(hpos, vpos+pixh)
+                + this.getWrappedValue(hpos+pixw, vpos+pixh);
             return value / 4;
         };
-        this.getPixel = function(x, y, s) {
-            var hpos = x/this.width;
-            var vpos = y/this.height;
-            var value = this.getAntialiasedValue(hpos, vpos);
+        this.getPixel = function(hpos, vpos, pixw, pixh, s) {
+            var value = this.getAntialiasedValue(hpos, vpos, pixw, pixh);
             var pixel = [];
             for (var i = 0; i != s.bg.length; ++i) {
                 pixel.push(s.bg[i] + value * (s.fg[i] - s.bg[i]));
             }
-            pixel.push( 255 * s.alphaLayer.getAntialiasedValue(hpos, vpos) );
+            pixel.push( 255
+                * s.alphaLayer.getAntialiasedValue(hpos, vpos, pixw, pixh) );
             return pixel;
         };
         this.drawToImage = function(image /*imagedata*/, kwArgs) {
@@ -126,6 +125,7 @@ var Starfish = new (function () {
               , alphaLayer: Starfish.opaque
             };
             var w = image.width, h = image.height;
+            var pixw = 1 / w, pixh = 1 / h;
             if (kwArgs) {
                 for (var kw in settings) {
                     if (kw in kwArgs) {
@@ -137,7 +137,7 @@ var Starfish = new (function () {
             var i = 0; // Actual index into data array
             for (var y=0; y < h; ++y) {
                 for (var x=0; x < w; ++x, i+=4) {
-                    var pixel = this.getPixel(x, y, settings);
+                    var pixel = this.getPixel(x/w, y/h, pixw, pixh, settings);
                     for (var j=0; j < 4; ++j) {
                         data[i+j] = pixel[j];
                     }
@@ -175,11 +175,11 @@ var Starfish = new (function () {
     OpaqueLayer.prototype = new this.Generator;
     this.opaque = new OpaqueLayer;
 
-    this.randomLayer = function(w, h) {
+    this.randomLayer = function() {
         var keys = Object.keys(this.generators);
         var choice = Math.floor( Math.random() * keys.length );
         var gen = this.generators[ keys[choice] ];
-        return new gen(w, h);
+        return new gen();
     };
 
 
@@ -234,70 +234,63 @@ var Starfish = new (function () {
     };
 
     // Make a starfish!
-    this.drawToCanvas = function(ctx, kwArgs) {
-        var messaged = false;
-        var numLayers = MIN_LAYERS + Math.floor(
-            Math.random() * (1 + MAX_LAYERS - MIN_LAYERS)
-        );
-        var startLayers = numLayers;
-        if (!kwArgs) {
-            kwArgs = {};
-        }
-        if (!('timeout' in kwArgs))
-            kwArgs.timeout = true;
-
-        // Initialize the canvas to black.
-        ctx.beginPath();
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-        var startTime = (new Date).valueOf();
-
-        while (numLayers-- > 0) {
-            // First, create a brand new canvas to draw a single layer into.
-            var layerCanvas = document.createElement('canvas');
-            layerCanvas.width = ctx.canvas.width;
-            layerCanvas.height = ctx.canvas.height;
-            var layerContext = layerCanvas.getContext('2d');
-            var fg = this.randomColor();
-            var bg = this.randomColor();
-
-            // Create a random layer.
-            var layer = this.randomLayer(ctx.canvas.width, ctx.canvas.height);
-
-            // Are we just going to use the layer as its own alpha mask?
-            // Or do we create an entirely new layer for an alpha?
-            var alphaLayer;
-
-            if (Math.random() < 0.5)
-                alphaLayer = layer;
-            else
-                alphaLayer = this.randomLayer(ctx.canvas.width, ctx.canvas.height);
-
-            // Are we going to use that layer as-is, or inverted?
-            if (Math.random() < 0.5)
-                alphaLayer = new this.invertLayer(alphaLayer);
-
-            layer.drawToCanvas(layerContext, {
-                fg: fg
-              , bg: bg
-              , alphaLayer: alphaLayer
-            });
-
-            ctx.drawImage(layerCanvas, 0, 0);
-
-            // Break out early if we're on a slow device (mobile phone,
-            // etc?) and have more than 2 layers
-            if (!messaged && numLayers > 0 && (new Date) - startTime > 5000 && startLayers - numLayers >= MIN_LAYERS) {
-                messaged = true;
-                if (kwArgs.timeout) {
-                    console.log("Timeout reached")
-                    break;
-                }
-                else {
-                    console.log("Timeout reached, but continuing anyway.");
-                }
-            }
-        }
+    this.Instance = function() {
+        this.init();
     };
+    this.InstanceProtoClass = function() {
+        this.init = function() {
+            var numLayers = MIN_LAYERS + Math.floor(
+                Math.random() * (1 + MAX_LAYERS - MIN_LAYERS)
+            );
+
+            var layers = this.layers = [];
+
+            while (numLayers-- > 0) {
+                var fg = Starfish.randomColor();
+                var bg = Starfish.randomColor();
+
+                // Create a random layer.
+                var layer = Starfish.randomLayer();
+
+                // Are we just going to use the layer as its own alpha mask?
+                // Or do we create an entirely new layer for an alpha?
+                var alphaLayer;
+
+                if (Math.random() < 0.5)
+                    alphaLayer = layer;
+                else
+                    alphaLayer = Starfish.randomLayer();
+
+                // Are we going to use that layer as-is, or inverted?
+                if (Math.random() < 0.5)
+                    alphaLayer = new Starfish.invertLayer(alphaLayer);
+
+                layers.push({
+                    layer: layer
+                  , alphaLayer: alphaLayer
+                  , fg: fg
+                  , bg: bg
+                });
+            }
+        };
+        this.render = function(ctx) {
+            // Initialize the canvas to black.
+            ctx.beginPath();
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            this.layers.forEach(function(layerInfo) {
+                // First, create a brand new canvas to draw a single layer into.
+                var layerCanvas = document.createElement('canvas');
+                layerCanvas.width = ctx.canvas.width;
+                layerCanvas.height = ctx.canvas.height;
+                var layerContext = layerCanvas.getContext('2d');
+
+                layerInfo.layer.drawToCanvas(layerContext, layerInfo);
+
+                ctx.drawImage(layerCanvas, 0, 0);
+            });
+        };
+    };
+    this.Instance.prototype = new this.InstanceProtoClass;
 });

@@ -47,12 +47,9 @@
     var VALMATRIX_SIZE = (1<<VALMATRIX_SCALE);
     var VALMATRIX_MAX = VALMATRIX_SIZE - 1;
 
-    var rangefrac = Starfish.generators.Rangefrac = function(w, h) {
+    var rangefrac = Starfish.generators.Rangefrac = function() {
         this.antialias = false;
         this.smoothOutSeams = false;
-
-        this.width = w;
-        this.height = h;
 
         this.generateFractal();
     }

@@ -149,12 +149,9 @@
     };
     SpinFlakeFloret.prototype = new SpinFlakeFloretProtoClass;
 
-    var spinflake = Starfish.generators.Spinflake = function(w, h) {
+    var spinflake = Starfish.generators.Spinflake = function() {
         this.antialias = true;
         this.smoothOutSeams = false;
-
-        this.width = w;
-        this.height = h;
 
         /*
            Pick a random location and size for this spinflake.
