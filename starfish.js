@@ -136,8 +136,9 @@ var Starfish = new (function () {
             }
             var data = image.data;
             var i = ((y * w) + x) * 4; // Actual index into data array
+            var stop = y + h * Starfish.renderMaxPercent;
             while (y < h) {
-                if ((new Date) >= timeout) {
+                if (y > stop || (new Date) >= timeout) {
                     return { x: x, y: y };
                 }
                 for (; x < w; ++x, i+=4) {
@@ -157,6 +158,15 @@ var Starfish = new (function () {
             context.putImageData(imagedata, 0, 0);
             return coords;
         };
+        this.drawToCanvas = function(context, kwArgs) {
+            var x = 0, y = 0;
+            do {
+                var coords = this.drawSomeToCanvas(
+                    context, kwArgs, x, y, (new Date).valueOf()+10000);
+                x = coords.x; y = coords.y;
+            }
+            while (x != 0 || y != 0);
+        }
     });
 
     this.white = [255, 255, 255];
@@ -297,7 +307,7 @@ var Starfish = new (function () {
             var layers = this.layers;
             var layerCanvas = this.layerCanvas;
             var layerContext = this.layerContext;
-            while (lnum < layers.length && (new Date) < timeout) {
+            if (lnum < layers.length) {
                 var layerInfo = this.layers[lnum];
 
                 var newCoords = layerInfo.layer.drawSomeToCanvas(
@@ -316,8 +326,7 @@ var Starfish = new (function () {
                     lnum++;
 
                     // Re-initialize drawing canvas
-                    layerContext.fillStyle = 'rgba(0,0,0,0)';
-                    layerContext.fillRect(
+                    layerContext.clearRect(
                         0, 0, layerCanvas.width, layerCanvas.height);
                 }
             }
@@ -336,5 +345,6 @@ var Starfish = new (function () {
     };
     this.Instance.prototype = new this.InstanceProtoClass;
 
-    this.renderTimeout = 100; //ms
+    this.renderTimeout = 500; //ms
+    this.renderMaxPercent = 0.2;
 });

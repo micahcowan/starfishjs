@@ -18,6 +18,8 @@
             var ctx;
 
             function drawIt(ev) {
+                if (ev && ev.preventDefault)
+                    ev.preventDefault();
                 var args = {};
                 window.location.hash.replace(/^#!/,'').split('&')
                         .forEach(function(arg) {
@@ -30,11 +32,21 @@
                 if (args.test && args.test in Starfish.generators) {
                     var layer = new Starfish.generators[args.test]();
                     layer.drawToCanvas(ctx);
+                    canvasToBackground();
                 }
                 else {
                     instance = new Starfish.Instance;
                     render(ev);
                 }
+            }
+            function canvasToBackground() {
+                var body = document.getElementsByTagName("body")[0];
+                var data = canvas.toDataURL();
+                body.style.background = "url(" + data + ")";
+
+                // draw to image
+                var img = document.getElementById("starfish-img");
+                img.src = data;
             }
             function render(ev) {
                 if (ev && ev.preventDefault)
@@ -60,13 +72,7 @@
                     canvas.height = h;
                 }
                 instance.render(ctx, function() {
-                    var body = document.getElementsByTagName("body")[0];
-                    var data = canvas.toDataURL();
-                    body.style.background = "url(" + data + ")";
-
-                    // draw to image
-                    var img = document.getElementById("starfish-img");
-                    img.src = data;
+                    canvasToBackground();
                 });
             }
             function start() {
