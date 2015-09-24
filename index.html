@@ -44,9 +44,13 @@
                 var data = canvas.toDataURL();
                 body.style.background = "url(" + data + ")";
 
-                // draw to image
+                // draw to image. We need this because some browsers
+                // (mobile/tablet) don't provide a way to save the
+                // canvas image, but do for img elements.
                 var img = document.getElementById("starfish-img");
                 img.src = data;
+                img.style.display = 'block';
+                canvas.style.display = 'none';
             }
             function render(ev) {
                 if (ev && ev.preventDefault)
@@ -71,6 +75,12 @@
                     canvas.width = w;
                     canvas.height = h;
                 }
+                // Show canvas instead of image until rendering's done,
+                // So we can see progress.
+                var img = document.getElementById("starfish-img");
+                img.style.display = 'none';
+                canvas.style.display = 'block';
+
                 instance.render(ctx, function() {
                     canvasToBackground();
                 });
@@ -99,10 +109,11 @@
                 animation-iteration-count: infinite;
                 animation-timing-function: linear;
             }
-            #starfish, #starfish-img {
-                border: solid 0.5em navy;
+            #starfish {
+                border: solid 0.5em red;
             }
             #starfish-img {
+                border: solid 0.5em navy;
                 display: none;
             }
             div {
