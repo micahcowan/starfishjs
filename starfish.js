@@ -29,7 +29,7 @@
 var Starfish = new (function () {
     var Starfish = this;
     var MIN_LAYERS = 2;
-    var MAX_LAYERS = 6;
+    var MAX_LAYERS = 4;
     this.generators = {};
 
     this.Generator = function() {
