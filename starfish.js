@@ -118,7 +118,8 @@ var Starfish = new (function () {
                 * s.alphaLayer.getAntialiasedValue(hpos, vpos, pixw, pixh) );
             return pixel;
         };
-        this.drawToImage = function(image /*imagedata*/, kwArgs) {
+        this.drawSomeToImage = function(image /*imagedata*/, kwArgs,
+                                        x, y, timeout) {
             var settings = {
                 bg:         Starfish.white
               , fg:         Starfish.black
@@ -134,25 +135,27 @@ var Starfish = new (function () {
                 }
             }
             var data = image.data;
-            var i = 0; // Actual index into data array
-            for (var y=0; y < h; ++y) {
-                for (var x=0; x < w; ++x, i+=4) {
-                    var pixel = this.getPixel(x/w, y/h, pixw, pixh, settings);
-                    for (var j=0; j < 4; ++j) {
-                        data[i+j] = pixel[j];
-                    }
+            var i = ((y * w) + x) * 4; // Actual index into data array
+            while (y < h) {
+                if ((new Date) >= timeout) {
+                    return { x: x, y: y };
                 }
+                for (; x < w; ++x, i+=4) {
+                    var pixel = this.getPixel(x/w, y/h, pixw, pixh, settings);
+                    data.set(pixel, i);
+                }
+                x = 0;
+                y++;
             }
+
+            return { x: 0, y: 0 }; // Indicate we're done.
         };
-        this.drawToNewImage = function(context, kwArgs) {
-            var w = context.canvas.width, h = context.canvas.height;
-            var imagedata = context.createImageData(w, h);
-            this.drawToImage(imagedata, kwArgs);
-            return imagedata;
-        };
-        this.drawToCanvas = function(context, kwArgs) {
-            var imagedata = this.drawToNewImage(context, kwArgs);
+        this.drawSomeToCanvas = function(context, kwArgs, x, y, timeout) {
+            var imagedata = context.getImageData(
+                0, 0, context.canvas.width, context.canvas.height);
+            var coords = this.drawSomeToImage(imagedata, kwArgs, x, y, timeout);
             context.putImageData(imagedata, 0, 0);
+            return coords;
         };
     });
 
@@ -273,24 +276,65 @@ var Starfish = new (function () {
                 });
             }
         };
-        this.render = function(ctx) {
+        this.render = function(ctx, cb) {
             // Initialize the canvas to black.
-            ctx.beginPath();
             ctx.fillStyle = 'black';
             ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-            this.layers.forEach(function(layerInfo) {
-                // First, create a brand new canvas to draw a single layer into.
-                var layerCanvas = document.createElement('canvas');
-                layerCanvas.width = ctx.canvas.width;
-                layerCanvas.height = ctx.canvas.height;
-                var layerContext = layerCanvas.getContext('2d');
+            this.backing = ctx.getImageData(
+                0, 0, ctx.canvas.width, ctx.canvas.height);
+            this.layerCanvas = document.createElement('canvas');
+            this.layerCanvas.width = ctx.canvas.width;
+            this.layerCanvas.height = ctx.canvas.height;
+            this.layerContext = this.layerCanvas.getContext('2d');
+            this.renderAt(ctx, 0, 0, 0, (new Date).valueOf() + Starfish.renderTimeout, cb);
+        };
+        this.renderAt = function(ctx, lnum, x, y, timeout, callback) {
+            // render for a while, but if we exceed |time| then
+            // give a little grace to the UI by stopping and setting a
+            // timeout so it can update, and not detect us as a runaway
+            // script.
+            var layers = this.layers;
+            var layerCanvas = this.layerCanvas;
+            var layerContext = this.layerContext;
+            while (lnum < layers.length && (new Date) < timeout) {
+                var layerInfo = this.layers[lnum];
 
-                layerInfo.layer.drawToCanvas(layerContext, layerInfo);
+                var newCoords = layerInfo.layer.drawSomeToCanvas(
+                    layerContext, layerInfo, x, y, timeout);
+                x = newCoords.x; y = newCoords.y;
 
+                // Draw what we have so far
+                ctx.putImageData(this.backing, 0, 0);
                 ctx.drawImage(layerCanvas, 0, 0);
-            });
+
+                if (x == 0 && y == 0) {
+                    // Done with this layer, save it to backing and
+                    // start on the next layer.
+                    this.backing = ctx.getImageData(
+                        0, 0, ctx.canvas.width, ctx.canvas.height);
+                    lnum++;
+
+                    // Re-initialize drawing canvas
+                    layerContext.fillStyle = 'rgba(0,0,0,0)';
+                    layerContext.fillRect(
+                        0, 0, layerCanvas.width, layerCanvas.height);
+                }
+            }
+
+            if (lnum >= layers.length) {
+                if (callback)
+                    callback();
+            }
+            else {
+                var self = this;
+                setTimeout(function() {
+                    self.renderAt(ctx, lnum, x, y, (new Date).valueOf()+Starfish.renderTimeout, callback);
+                }, 0);
+            }
         };
     };
     this.Instance.prototype = new this.InstanceProtoClass;
+
+    this.renderTimeout = 100; //ms
 });

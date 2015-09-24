@@ -59,15 +59,15 @@
                     canvas.width = w;
                     canvas.height = h;
                 }
-                instance.render(ctx);
+                instance.render(ctx, function() {
+                    var body = document.getElementsByTagName("body")[0];
+                    var data = canvas.toDataURL();
+                    body.style.background = "url(" + data + ")";
 
-                var body = document.getElementsByTagName("body")[0];
-                var data = canvas.toDataURL();
-                body.style.background = "url(" + data + ")";
-
-                // draw to image
-                var img = document.getElementById("starfish-img");
-                img.src = data;
+                    // draw to image
+                    var img = document.getElementById("starfish-img");
+                    img.src = data;
+                });
             }
             function start() {
                 canvas = document.getElementById("starfish");
