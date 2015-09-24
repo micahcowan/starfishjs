@@ -13,7 +13,11 @@
                 window.location.hash = "#!size=384";
             }
 
-            function drawIt() {
+            var instance;
+            var canvas;
+            var ctx;
+
+            function drawIt(ev) {
                 var args = {};
                 window.location.hash.replace(/^#!/,'').split('&')
                         .forEach(function(arg) {
@@ -23,7 +27,27 @@
                     else if (s[0])
                         args[s[0]] = true;
                 });
-                var canvas = document.getElementById("starfish");
+                if (args.test && args.test in Starfish.generators) {
+                    var layer = new Starfish.generators[args.test]();
+                    layer.drawToCanvas(ctx);
+                }
+                else {
+                    instance = new Starfish.Instance;
+                    render(ev);
+                }
+            }
+            function render(ev) {
+                if (ev && ev.preventDefault)
+                    ev.preventDefault();
+                var args = {};
+                window.location.hash.replace(/^#!/,'').split('&')
+                        .forEach(function(arg) {
+                    var s = arg.split('=', 2);
+                    if (s.length == 2)
+                        args[s[0]] = s[1];
+                    else if (s[0])
+                        args[s[0]] = true;
+                });
                 if (args.size) {
                     var dimens = args.size.split('x', 2);
                     var w = dimens[0];
@@ -35,16 +59,7 @@
                     canvas.width = w;
                     canvas.height = h;
                 }
-                var ctx = canvas.getContext("2d");
-                var w = canvas.width, h = canvas.height;
-                if (args.test && args.test in Starfish.generators) {
-                    var layer = new Starfish.generators[args.test](w, h);
-                    layer.drawToCanvas(ctx);
-                }
-                else {
-                    instance = new Starfish.Instance;
-                    instance.render(ctx);
-                }
+                instance.render(ctx);
 
                 var body = document.getElementsByTagName("body")[0];
                 var data = canvas.toDataURL();
@@ -55,8 +70,12 @@
                 img.src = data;
             }
             function start() {
+                canvas = document.getElementById("starfish");
+                ctx = canvas.getContext("2d");
                 var refreshLink = document.getElementById('refresh-link');
+                var renderLink = document.getElementById('render-link');
                 refreshLink.addEventListener('click', drawIt);
+                renderLink.addEventListener('click', render);
                 drawIt();
             }
             window.addEventListener('load', start);
@@ -77,8 +96,8 @@
             #starfish, #starfish-img {
                 border: solid 0.5em navy;
             }
-            #starfish {
-                visibility: hidden;
+            #starfish-img {
+                display: none;
             }
             div {
                 background-color: rgba(255,255,255,0.7);
@@ -95,8 +114,9 @@
     </head>
     <body>
         <div>
-        <p><strong>Click <a href="javascript:void(0);"
-            id="refresh-link">here</a> to try a fresh pattern (and then
+            <p><strong>Click <a href="" id="refresh-link">here</a>
+                to try a fresh pattern,
+            or <a id="render-link" href="">render it again</a> (and then
         wait several seconds).</strong></p>
 
         <p>Right-click the boxed image to save the currently-viewed
