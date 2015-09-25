@@ -163,7 +163,6 @@
                interpolation. It could be generalized with a little work.
              */
             var totalweight = 0;
-            var totalsum = 0;
             var tweaker = 0.5 / VALMATRIX_SIZE;
             tweaker = 0;
             var smallH = Math.floor(h * VALMATRIX_SIZE - tweaker);
@@ -171,30 +170,36 @@
             var bigH = smallH + 1;
             var bigV = smallV + 1;
             var localval, localweight;
+            var list = [];
             //TOPLEFT
             localval = this.getMatrixVal(smallH, smallV);
             localweight = this.calcWeight(smallH, smallV, h, v);
-            totalsum += (localval * localweight);
             totalweight += localweight;
+            list.push([localweight, localval]);
             //TOPRIGHT
             localval = this.getMatrixVal(bigH, smallV);
             localweight = this.calcWeight(bigH, smallV, h, v);
-            totalsum += (localval * localweight);
             totalweight += localweight;
+            list.push([localweight, localval]);
             //BOTLEFT
             localval = this.getMatrixVal(smallH, bigV);
             localweight = this.calcWeight(smallH, bigV, h, v);
-            totalsum += (localval * localweight);
             totalweight += localweight;
+            list.push([localweight, localval]);
             //BOTRIGHT
             localval = this.getMatrixVal(bigH, bigV);
             localweight = this.calcWeight(bigH, bigV, h, v);
-            totalsum += (localval * localweight);
             totalweight += localweight;
-            //TAKE AVERAGE
-            if (false) // set to true for pixelation
-                return this.getMatrixVal(smallH, smallV);
-            return totalsum / totalweight;
+            list.push([localweight, localval]);
+            //TAKE WEIGHTED RANDOM VAL
+            var choice = Math.random() * totalweight;
+            while (list.length > 1) {
+                if (choice < list[0][0])
+                    break;
+                choice -= list[0][0];
+                list.splice(0, 1);
+            }
+            return list[0][1];
         };
 
         this.getMatrixVal = function(matrixh, matrixv) {

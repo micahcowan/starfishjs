@@ -29,6 +29,17 @@
                     else if (s[0])
                         args[s[0]] = true;
                 });
+                if (args.size) {
+                    var dimens = args.size.split('x', 2);
+                    var w = dimens[0];
+                    var h;
+                    if (dimens[1])
+                        h = dimens[1];
+                    else
+                        h = w;
+                    canvas.width = w;
+                    canvas.height = h;
+                }
                 if (args.test && args.test in Starfish.generators) {
                     var layer = new Starfish.generators[args.test]();
                     layer.drawToCanvas(ctx);
