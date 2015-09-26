@@ -16,12 +16,15 @@
             var instance;
             var canvas;
             var ctx;
+            var hash;
+            var args;
 
-            function drawIt(ev) {
-                if (ev && ev.preventDefault)
-                    ev.preventDefault();
-                var args = {};
-                window.location.hash.replace(/^#!/,'').split('&')
+            function adjustCanvasSize() {
+                args = {};
+                if (hash == window.location.hash)
+                    return;
+                hash = window.location.hash;
+                hash.replace(/^#!/,'').split('&')
                         .forEach(function(arg) {
                     var s = arg.split('=', 2);
                     if (s.length == 2)
@@ -40,6 +43,12 @@
                     canvas.width = w;
                     canvas.height = h;
                 }
+            }
+
+            function drawIt(ev) {
+                adjustCanvasSize();
+                if (ev && ev.preventDefault)
+                    ev.preventDefault();
                 if (args.test && args.test in Starfish.generators) {
                     instance = new Starfish.generators[args.test]();
                 }
@@ -64,28 +73,9 @@
             }
 
             function render(ev) {
+                adjustCanvasSize();
                 if (ev && ev.preventDefault)
                     ev.preventDefault();
-                var args = {};
-                window.location.hash.replace(/^#!/,'').split('&')
-                        .forEach(function(arg) {
-                    var s = arg.split('=', 2);
-                    if (s.length == 2)
-                        args[s[0]] = s[1];
-                    else if (s[0])
-                        args[s[0]] = true;
-                });
-                if (args.size) {
-                    var dimens = args.size.split('x', 2);
-                    var w = dimens[0];
-                    var h;
-                    if (dimens[1])
-                        h = dimens[1];
-                    else
-                        h = w;
-                    canvas.width = w;
-                    canvas.height = h;
-                }
                 // Show canvas instead of image until rendering's done,
                 // So we can see progress.
                 var img = document.getElementById("starfish-img");
