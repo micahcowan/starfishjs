@@ -286,7 +286,7 @@ var Starfish = new (function () {
                 });
             }
         };
-        this.render = function(ctx, cb) {
+        this.render = function(ctx, progCb, finishCb) {
             // Initialize the canvas to black.
             ctx.fillStyle = 'black';
             ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -297,9 +297,9 @@ var Starfish = new (function () {
             this.layerCanvas.width = ctx.canvas.width;
             this.layerCanvas.height = ctx.canvas.height;
             this.layerContext = this.layerCanvas.getContext('2d');
-            this.renderAt(ctx, 0, 0, 0, (new Date).valueOf() + Starfish.renderTimeout, cb);
+            this.renderAt(ctx, 0, 0, 0, (new Date).valueOf() + Starfish.renderTimeout, progCb, finishCb);
         };
-        this.renderAt = function(ctx, lnum, x, y, timeout, callback) {
+        this.renderAt = function(ctx, lnum, x, y, timeout, progCb, finishCb) {
             // render for a while, but if we exceed |time| then
             // give a little grace to the UI by stopping and setting a
             // timeout so it can update, and not detect us as a runaway
@@ -332,14 +332,21 @@ var Starfish = new (function () {
             }
 
             if (lnum >= layers.length) {
-                if (callback)
-                    callback();
+                if (finishCb)
+                    finishCb();
             }
             else {
                 var self = this;
+                if (progCb) {
+                    progCb({
+                        curLayer:       lnum+1
+                      , numLayers:      layers.length
+                      , percentDone:    Math.floor(100 * y/ctx.canvas.height)
+                    });
+                }
                 setTimeout(function() {
-                    self.renderAt(ctx, lnum, x, y, (new Date).valueOf()+Starfish.renderTimeout, callback);
-                }, 0);
+                    self.renderAt(ctx, lnum, x, y, (new Date).valueOf()+Starfish.renderTimeout, progCb, finishCb);
+                }, 250);
             }
         };
     };

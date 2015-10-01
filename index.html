@@ -3,7 +3,9 @@
     <head>
         <title>StarfishJS - Automatic tiled wallpaper generator</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link href="jquery-ui.min.css" rel="stylesheet" />
         <script src="jquery-2.1.4.min.js" type="text/javascript"></script>
+        <script src="jquery-ui.min.js" type="text/javascript"></script>
         <script src="starfish.js" type="text/javascript"></script>
         <script src="sf-coswave.js" type="text/javascript"></script>
         <script src="sf-spinflake.js" type="text/javascript"></script>
@@ -75,11 +77,38 @@
                 if (instance instanceof Starfish.Instance) {
                     $('#render-link').prop('disabled', true);
                     $('#refresh-link').prop('disabled', true);
-                    instance.render(ctx, function() {
-                        canvasToBackground();
-                        $('#render-link').prop('disabled', false);
-                        $('#refresh-link').prop('disabled', false);
-                    });
+
+                    // Set up progress display
+                    $('#render-info > div').css('display', 'none');
+                    $('#render-info > p').html('Initializing layers...');
+                    $('#render-info').css('display', 'block');
+                    instance.render(ctx,
+                        // callback for progress updates:
+                        function(info) {
+                            $('#render-info > p')
+                                .html('Pattern generation in progress');
+                            $('#inst-info, #layer-info').css('display', 'block');
+                            $('#inst-info > p')
+                                .html('Layer ' + info.curLayer
+                                      + '/' + info.numLayers);
+                            var totalProg
+                                = ((info.curLayer - 1 + info.percentDone/100)
+                                   / info.numLayers);
+                            $('#inst-prog')
+                                .progressbar('value', 100 * totalProg);
+
+                            $('#layer-percent')
+                                .html(info.percentDone + '%');
+                            $('#layer-prog')
+                                .progressbar('value', info.percentDone);
+                        }
+                        // callback when complete:
+                      , function() {
+                            canvasToBackground();
+                            $('#render-link').prop('disabled', false);
+                            $('#refresh-link').prop('disabled', false);
+                            $('#render-info').css('display', 'none');
+                        });
                 }
                 else {
                     // layer
@@ -89,12 +118,14 @@
             }
 
             function start() {
-                canvas = document.getElementById("starfish");
+                canvas = $("#starfish")[0];
                 ctx = canvas.getContext("2d");
-                var refreshLink = document.getElementById('refresh-link');
-                var renderLink = document.getElementById('render-link');
-                refreshLink.addEventListener('click', drawIt);
-                renderLink.addEventListener('click', render);
+                $('#refresh-link').click( drawIt );
+                $('#render-link').click( render );
+
+                $('#inst-prog').progressbar({value: 25});
+                $('#layer-prog').progressbar({value: 85});
+
                 drawIt();
             }
 
@@ -123,7 +154,7 @@
             div.outer {
                 background-color: rgba(255,255,255,0.7);
                 font-weight: 500;
-                padding: 0.25em;
+                padding: 0.33em;
                 width: 384px;
                 font: 0.8em sans-serif;
                 margin-bottom: 0.50em;
@@ -137,15 +168,41 @@
             .form {
                 white-space: nowrap;
             }
-            /*
-            input[type="number"] {
-                margin-left: 0;
-                margin-right: 0;
-            } */
+            #render-info {
+                /* display: none; */
+                font-weight: bold;
+                margin: 0.33em;
+                padding: 0.33em;
+                background: #ddd;
+                /* background: #e0e8ff; */
+            }
+            #render-info > div {
+                margin: 0.33em;
+                padding: 0.33em;
+                border: 1px solid #aad;
+                border-radius: 0.67em;
+                font-size: 0.85em;
+            }
+            .ui-progressbar {
+                height: 1em;
+                margin: 0.12em;
+            }
         </style>
     </head>
     <body>
         <div class="outer">
+
+        <div id="render-info">
+            <p>Pattern generation in progress</p>
+            <div id="inst-info">
+                <p>Layer 1/4</p>
+                <div id="inst-prog"></div>
+            </div><!-- inst-info -->
+            <div id="layer-info">
+                <p>Layer progress: <span id="layer-percent">0%</span></p>
+                <div id="layer-prog"></div>
+            </div>
+        </div>
 
         <div class="form">
             <label for="width">Width</label>
@@ -162,9 +219,9 @@
 
         <hr />
 
-        <p>Right-click the boxed image to save the currently-viewed
-        wallpaper as a file, and be sure that the filename ends in
-        <q>.png</q>.</p>
+        <p><b>To save:</b> Right-click the boxed image and select
+        <q>Select Image As&hellip;</q>, and be sure that the filename ends in
+        <q>.png</q> (Safari doesn't name the file properly by default).</p>
 
         <p>This is StarfishJS, a JavaScript port of Starfish, which
         randomly generates a beautiful new wallpaper whenever you ask it
