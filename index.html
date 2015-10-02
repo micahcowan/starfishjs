@@ -3,13 +3,17 @@
     <head>
         <title>StarfishJS - Automatic tiled wallpaper generator</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
         <link href="jquery-ui.min.css" rel="stylesheet" />
-        <script src="jquery-2.1.4.min.js" type="text/javascript"></script>
-        <script src="jquery-ui.min.js" type="text/javascript"></script>
-        <script src="starfish.js" type="text/javascript"></script>
-        <script src="sf-coswave.js" type="text/javascript"></script>
-        <script src="sf-spinflake.js" type="text/javascript"></script>
-        <script src="sf-rangefrac.js" type="text/javascript"></script>
+
+        <script src="jquery-2.1.4.min.js"></script>
+        <script src="jquery-ui.min.js"></script>
+        <script src="starfish.js"></script>
+        <script src="sf-coswave.js"></script>
+        <script src="sf-spinflake.js"></script>
+        <script src="sf-rangefrac.js"></script>
+        <script src="download.js"></script>
+
         <script type="text/javascript">
             // @license magnet:?xt=urn:btih:90dc5c0be029de84e523b9b3922520e79e0e6f08&dn=cc0.txt CC0
             var instance;
@@ -75,8 +79,7 @@
                 canvas.style.display = 'block';
 
                 if (instance instanceof Starfish.Instance) {
-                    $('#render-link').prop('disabled', true);
-                    $('#refresh-link').prop('disabled', true);
+                    $('.post-render').prop('disabled', true);
 
                     // Set up progress display
                     $('#render-info > div').css('display', 'none');
@@ -105,9 +108,8 @@
                         // callback when complete:
                       , function() {
                             canvasToBackground();
-                            $('#render-link').prop('disabled', false);
-                            $('#refresh-link').prop('disabled', false);
-                            $('#render-info').css('display', 'none');
+                            $('.post-render').prop('disabled', false);
+                            $('#render-info').slideUp();
                         });
                 }
                 else {
@@ -117,11 +119,17 @@
                 }
             }
 
+            function downloadImg() {
+                var url = $('#starfish-img').prop('src');
+                download(url, 'starfish.png', 'image/png');
+            }
+
             function start() {
                 canvas = $("#starfish")[0];
                 ctx = canvas.getContext("2d");
                 $('#refresh-link').click( drawIt );
                 $('#render-link').click( render );
+                $('#download-link').click( downloadImg );
 
                 $('#inst-prog').progressbar({value: 25});
                 $('#layer-prog').progressbar({value: 85});
@@ -189,6 +197,7 @@
         </style>
     </head>
     <body>
+        <iframe style="display: none" id="download-iframe"></iframe>
         <div class="outer">
 
         <div id="render-info">
@@ -212,15 +221,14 @@
             <label for="height">Height</label>
             <input id="height" type="number" value="384" />
 
-            <button id="refresh-link">New Pattern</button>
-            <button id="render-link">Render Again</button>
+            <br />
+
+            <button id="refresh-link" class="post-render">New Pattern</button>
+            <button id="render-link" class="post-render">Render Again</button>
+            <button id="download-link" class="post-render">Download</button>
         </div>
 
         <hr />
-
-        <p><b>To save:</b> Right-click the boxed image and select
-        <q>Select Image As&hellip;</q>, and be sure that the filename ends in
-        <q>.png</q> (Safari doesn't name the file properly by default).</p>
 
         <p>This is StarfishJS, a JavaScript port of Starfish, which
         randomly generates a beautiful new wallpaper whenever you ask it
