@@ -75,17 +75,21 @@
            bounding box so we can
            do quicker hit tests.
          */
-        this.boundL = this.h - this.scale * 3;
-        this.boundR = this.h + this.scale * 3;
-        this.boundT = this.v - this.scale * 3;
-        this.boundB = this.v + this.scale * 3;
+        var squishMax; // Maximum amount squish might alter the bounds.
+        squishMax = this.squish;
+        if (1/squishMax > squishMax) squishMax = 1/squishMax;
+        // squishMax += 1;
+        this.boundL = this.h - this.scale * squishMax;
+        this.boundR = this.h + this.scale * squishMax;
+        this.boundT = this.v - this.scale * squishMax;
+        this.boundB = this.v + this.scale * squishMax;
     };
     var BubbleProtoClass = function() {
         this.getValue = function(h, v) {
             // Check bounds.
             if (h < this.boundL || h > this.boundR
                 || v < this.boundT || v > this.boundB)
-                ;
+                return 0;
 
             /*
                Rotate the h and v values around the origin of the bubble
@@ -123,7 +127,7 @@
                little effect that gets non-spherical bubbles.
              */
             var h = this.h + ((h - this.h) * this.squish);
-            var v = this.v + ((v - this.v) * this.squish);
+            var v = this.v + ((v - this.v) / this.squish);
             return this.getRawBubbleValue(h, v);
         };
         this.getRawBubbleValue = function(h, v) {
@@ -137,7 +141,8 @@
             var a = h - this.h;
             var b = v - this.v;
             var hypotenuse = Math.sqrt(a*a + b*b);
-            var ret = 1 - hypotenuse * hypotenuse / this.scale;
+            //var ret = 1 - hypotenuse * hypotenuse / this.scale;
+            var ret = (this.scale - hypotenuse) / this.scale;
             return ret < 0? 0: ret;
         };
     };
