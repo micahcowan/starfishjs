@@ -30,6 +30,7 @@ var Starfish = new (function () {
     var Starfish = this;
     var MIN_LAYERS = 2;
     var MAX_LAYERS = 4;
+    this.ANTIALIAS_LEVEL = 3;
     this.generators = {};
 
     this.Generator = function() {
@@ -95,18 +96,20 @@ var Starfish = new (function () {
             return value;
         };
         this.getAntialiasedValue = function(hpos, vpos, pixw, pixh) {
-            // FIXME: We probably want an adjustable antialiasing,
-            // rather than true/false.
-            var value
-                = this.getWrappedValue(hpos, vpos);
+            if (!this.antialias) return this.getWrappedValue(hpos, vpos);
 
-            if (!this.antialias) return value;
-
-            value = value
-                + this.getWrappedValue(hpos+pixw, vpos)
-                + this.getWrappedValue(hpos, vpos+pixh)
-                + this.getWrappedValue(hpos+pixw, vpos+pixh);
-            return value / 4;
+            var r = Math.random.bind(Math);
+            var level = Starfish.ANTIALIAS_LEVEL;
+            var value = 0;
+            for (var i = 0; i < level; ++i) {
+                for (var j = 0; j < level; ++j) {
+                    value += this.getWrappedValue(
+                        hpos + i*(pixw/level)
+                      , vpos + j*(pixh/level)
+                    );
+                }
+            }
+            return value / (level * level);
         };
         this.getPixel = function(hpos, vpos, pixw, pixh, s) {
             var value = this.getAntialiasedValue(hpos, vpos, pixw, pixh);
