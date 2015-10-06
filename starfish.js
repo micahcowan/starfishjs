@@ -259,35 +259,39 @@ var Starfish = new (function () {
                 Math.random() * (1 + MAX_LAYERS - MIN_LAYERS)
             );
 
-            var layers = this.layers = [];
+            this.layers = [];
 
             while (numLayers-- > 0) {
-                var fg = Starfish.randomColor();
-                var bg = Starfish.randomColor();
-
-                // Create a random layer.
-                var layer = Starfish.randomLayer();
-
-                // Are we just going to use the layer as its own alpha mask?
-                // Or do we create an entirely new layer for an alpha?
-                var alphaLayer;
-
-                if (Math.random() < 0.5)
-                    alphaLayer = layer;
-                else
-                    alphaLayer = Starfish.randomLayer();
-
-                // Are we going to use that layer as-is, or inverted?
-                if (Math.random() < 0.5)
-                    alphaLayer = new Starfish.invertLayer(alphaLayer);
-
-                layers.push({
-                    layer: layer
-                  , alphaLayer: alphaLayer
-                  , fg: fg
-                  , bg: bg
-                });
+                this.pushNewLayer();
             }
+        };
+        this.pushNewLayer = function() {
+            var fg = Starfish.randomColor();
+            var bg = Starfish.randomColor();
+
+            // Create a random layer.
+            var layers = this.layers;
+            var layer = Starfish.randomLayer();
+
+            // Are we just going to use the layer as its own alpha mask?
+            // Or do we create an entirely new layer for an alpha?
+            var alphaLayer;
+
+            if (Math.random() < 0.5)
+                alphaLayer = layer;
+            else
+                alphaLayer = Starfish.randomLayer();
+
+            // Are we going to use that layer as-is, or inverted?
+            if (Math.random() < 0.5)
+                alphaLayer = new Starfish.invertLayer(alphaLayer);
+
+            layers.push({
+                layer: layer
+              , alphaLayer: alphaLayer
+              , fg: fg
+              , bg: bg
+            });
         };
         this.render = function(ctx, progCb, finishCb) {
             // Initialize the canvas to black.
