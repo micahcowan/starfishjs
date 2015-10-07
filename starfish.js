@@ -264,6 +264,17 @@ var Starfish = new (function () {
             while (numLayers-- > 0) {
                 this.pushNewLayer();
             }
+
+            // Set background color
+            var color = Starfish.randomColor();
+            var css = '#';
+            color.forEach(function(c) {
+                var hex = c.toString(16);
+                if (hex.length == 1)
+                    hex = '0' + hex;
+                css += hex;
+            });
+            this.backgroundColor = css;
         };
         this.pushNewLayer = function() {
             var fg = Starfish.randomColor();
@@ -294,8 +305,12 @@ var Starfish = new (function () {
             });
         };
         this.render = function(ctx, progCb, finishCb) {
-            // Initialize the canvas to black.
-            ctx.fillStyle = 'black';
+            // Original always started with a background of black,
+            // but there's no particular reason we should, and it
+            // biases patterns towards darker colors (particularly when
+            // there are few layers). We just use an arbitrarily-chosen
+            // background color (set in .init()).
+            ctx.fillStyle = this.backgroundColor;
             ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
             this.backing = ctx.getImageData(
