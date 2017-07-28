@@ -1,0 +1,28 @@
+{
+  "name": "starfishjs",
+  "version": "1.0.0",
+  "description": "Randomly generates beautiful, seamlessly tiled wallpapers.",
+  "main": "starfish.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/micahcowan/starfishjs.git"
+  },
+  "keywords": [
+    "wallpaper",
+    "image",
+    "png",
+    "tiled",
+    "starfish",
+    "desktop",
+    "web"
+  ],
+  "author": "Micah Cowan",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/micahcowan/starfishjs/issues"
+  },
+  "homepage": "http://micah.cowan.name/starfishjs/"
+}
