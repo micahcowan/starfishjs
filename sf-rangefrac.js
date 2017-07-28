@@ -34,7 +34,9 @@
    materials.
  */
 
-(function() {
+{
+var registerLayer =
+(function(Starfish) {
     /*
        The scale determines how many data points we calculate.
        The more data points, the tighter the resolution, and the
@@ -216,4 +218,13 @@
     };
     rangefracProtoClass.prototype = new Starfish.Generator;
     rangefrac.prototype = new rangefracProtoClass;
-})();
+});
+
+// If we are running under Node.js, export registration function.
+// otherwise, just register.
+if (typeof module !== 'undefined' && typeof module.exports == 'object') {
+    module.exports.registerLayer = registerLayer;
+} else if (Starfish !== undefined) {
+    registerLayer(Starfish);
+}
+}

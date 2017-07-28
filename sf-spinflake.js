@@ -51,7 +51,9 @@
    kills the contrast; we don't like that, so we wrap it our own way.
  */
 
-(function() {
+{
+var registerLayer =
+(function(Starfish) {
     var MAX_FLORETS = 3;
     var MAX_SPINES = 16;
     var MAX_TWIRL = 14;
@@ -254,4 +256,13 @@
     };
     spinflakeProtoClass.prototype = new Starfish.Generator;
     spinflake.prototype = new spinflakeProtoClass;
-})();
+});
+
+// If we are running under Node.js, export registration function.
+// otherwise, just register.
+if (typeof module !== 'undefined' && typeof module.exports == 'object') {
+    module.exports.registerLayer = registerLayer;
+} else if (Starfish !== undefined) {
+    registerLayer(Starfish);
+}
+}

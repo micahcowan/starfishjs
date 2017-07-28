@@ -36,7 +36,9 @@
    Stop laughing already.
  */
 
-(function() {
+{
+var registerLayer =
+(function(Starfish) {
     var coswave = Starfish.generators.Coswave = function() {
         this.antialias = true;
         this.smoothOutSeams = true;
@@ -124,4 +126,13 @@
     };
     coswaveProtoClass.prototype = new Starfish.Generator;
     coswave.prototype = new coswaveProtoClass;
-})();
+});
+
+// If we are running under Node.js, export registration function.
+// otherwise, just register.
+if (typeof module !== 'undefined' && typeof module.exports == 'object') {
+    module.exports.registerLayer = registerLayer;
+} else if (Starfish !== undefined) {
+    registerLayer(Starfish);
+}
+}

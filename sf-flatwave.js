@@ -33,7 +33,9 @@
    interfering with each other and making interesting effects.
  */
 
-(function() {
+{
+var registerLayer =
+(function(Starfish) {
     var MIN_SCALE = 2;
     var MAX_SCALE = 30;
     var MAX_WAVE_PACKETS = 4;
@@ -173,4 +175,13 @@
         var gen = flatwave.imtypes[ keys[choice] ];
         return gen;
     };
-})();
+});
+
+// If we are running under Node.js, export registration function.
+// otherwise, just register.
+if (typeof module !== 'undefined' && typeof module.exports == 'object') {
+    module.exports.registerLayer = registerLayer;
+} else if (Starfish !== undefined) {
+    registerLayer(Starfish);
+}
+}

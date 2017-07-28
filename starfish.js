@@ -193,6 +193,9 @@ var Starfish = new (function () {
 
     this.randomLayer = function() {
         var keys = Object.keys(this.generators);
+        if (keys.length == 0) {
+            throw "Starfish: can't generate random layer: no registered layer generators!";
+        }
         var choice = Math.floor( Math.random() * keys.length );
         var gen = this.generators[ keys[choice] ];
         return new gen();
@@ -377,3 +380,8 @@ var Starfish = new (function () {
     this.renderTimeout = 500; //ms
     this.renderMaxPercent = 0.2;
 });
+
+// If we are running under Node.js, export Starfish.
+if (typeof module !== 'undefined' && typeof module.exports == 'object') {
+    module.exports.starfish = Starfish;
+}

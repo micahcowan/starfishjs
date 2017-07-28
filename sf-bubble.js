@@ -33,7 +33,9 @@
    adding glycerine to a tub of water and blowing in it with a straw.
  */
 
-(function() {
+{
+var registerLayer =
+(function(Starfish) {
     var MAX_BUBBLES = 32;
     var MIN_BUBBLES = MAX_BUBBLES / 4;
 
@@ -280,4 +282,13 @@
     };
     bubbleProtoClass.prototype = new Starfish.Generator;
     bubble.prototype = new bubbleProtoClass;
-})();
+});
+
+// If we are running under Node.js, export registration function.
+// otherwise, just register.
+if (typeof module !== 'undefined' && typeof module.exports == 'object') {
+    module.exports.registerLayer = registerLayer;
+} else if (Starfish !== undefined) {
+    registerLayer(Starfish);
+}
+}
