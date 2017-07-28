@@ -1,0 +1,7 @@
+TODO
+
+- NPMify starfishjs
+- Convert starfishjs to be more platform-agnostic library-like
+- build a node CLI image generator, using "node-png"?
+- implement a wallpaper-setting feature (use npm's "wallpaper"?)
+- give finer control over layers, etc.
