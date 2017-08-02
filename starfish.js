@@ -30,6 +30,13 @@ var Starfish = new (function () {
     var Starfish = this;
     var MIN_LAYERS = 2;
     var MAX_LAYERS = 4;
+
+    var ELEMS_PER_PIXEL = 4;
+    var RED = 0;
+    var BLUE = 1;
+    var GREEN = 2;
+    var ALPHA = 3;
+
     this.ANTIALIAS_LEVEL = 3;
     this.generators = {};
 
@@ -39,7 +46,7 @@ var Starfish = new (function () {
         // MUST be overridden by descendants:
         // (hpos and vpos are in the range 0 - 1)
         this.getValue = function(hpos, vpos) {
-            throw "Generator.getPixel not overridden in " + this.toString();
+            throw "Generator.getValue not overridden in " + this.toString();
         };
 
         this.getWrappedValue = function(hpos, vpos) {
@@ -114,7 +121,7 @@ var Starfish = new (function () {
         this.getPixel = function(hpos, vpos, pixw, pixh, s) {
             var value = this.getAntialiasedValue(hpos, vpos, pixw, pixh);
             var pixel = [];
-            for (var i = 0; i != s.bg.length; ++i) {
+            for (var i = 0; i != ALPHA; ++i) {
                 pixel.push(s.bg[i] + value * (s.fg[i] - s.bg[i]));
             }
             pixel.push( 255
@@ -138,15 +145,27 @@ var Starfish = new (function () {
                 }
             }
             var data = image.data;
-            var i = ((y * w) + x) * 4; // Actual index into data array
+            var i = ((y * w) + x) * ELEMS_PER_PIXEL;
+                // Actual index into data array
             var stop = y + h * Starfish.renderMaxPercent;
             while (y < h) {
                 if (y > stop || (new Date) >= timeout) {
                     return { x: x, y: y };
                 }
-                for (; x < w; ++x, i+=4) {
+                for (; x < w; ++x, i+=ELEMS_PER_PIXEL) {
+                    // This layer's pixel:
                     var pixel = this.getPixel(x/w, y/h, pixw, pixh, settings);
-                    data.set(pixel, i);
+                    // Existing pixel:
+                    var old = data.slice(i,i+ELEMS_PER_PIXEL);
+                    // How much of each to mix:
+                    var newMix = pixel[ALPHA] / 255;
+                    var oldMix = 1 - newMix;
+                    var mixed = [];
+                    for (var j=0; j<ALPHA; ++j) {
+                        mixed.push(pixel[j] * newMix + old[j] * oldMix);
+                    }
+                    mixed.push(255);
+                    data.set(mixed, i);
                 }
                 x = 0;
                 y++;
@@ -154,32 +173,29 @@ var Starfish = new (function () {
 
             return { x: 0, y: 0 }; // Indicate we're done.
         };
-        this.drawSomeToCanvas = function(context, kwArgs, x, y, timeout) {
-            var imagedata = context.getImageData(
-                0, 0, context.canvas.width, context.canvas.height);
-            var coords = this.drawSomeToImage(imagedata, kwArgs, x, y, timeout);
-            context.putImageData(imagedata, 0, 0);
-            return coords;
-        };
         this.drawToCanvas = function(context, kwArgs) {
+            var cvs = context.canvas;
+            var imageData = context.getImageData(0, 0, cvs.width, cvs.height);
             var x = 0, y = 0;
             do {
-                var coords = this.drawSomeToCanvas(
-                    context, kwArgs, x, y, (new Date).valueOf()+10000);
+                var coords = this.drawSomeToImage(
+                    imageData, kwArgs, x, y, (new Date).valueOf()+10000);
                 x = coords.x; y = coords.y;
             }
             while (x != 0 || y != 0);
+            context.putImageData(imageData, 0, 0);
         }
     });
 
-    this.white = [255, 255, 255];
-    this.black = [0, 0, 0];
+    this.white = [255, 255, 255, 255];
+    this.black = [0, 0, 0, 255];
 
     this.randomColor = function() {
         var color = [];
         for (var i=0; i != 3; ++i) {
             color.push( Math.floor( Math.random() * 256 ) );
         }
+        color.push(255);
         return color;
     };
 
@@ -269,15 +285,7 @@ var Starfish = new (function () {
             }
 
             // Set background color
-            var color = Starfish.randomColor();
-            var css = '#';
-            color.forEach(function(c) {
-                var hex = c.toString(16);
-                if (hex.length == 1)
-                    hex = '0' + hex;
-                css += hex;
-            });
-            this.backgroundColor = css;
+            this.backgroundColor = Starfish.randomColor();
         };
         this.pushNewLayer = function() {
             var fg = Starfish.randomColor();
@@ -307,52 +315,36 @@ var Starfish = new (function () {
               , bg: bg
             });
         };
-        this.render = function(ctx, progCb, finishCb) {
-            // Original always started with a background of black,
-            // but there's no particular reason we should, and it
-            // biases patterns towards darker colors (particularly when
-            // there are few layers). We just use an arbitrarily-chosen
-            // background color (set in .init()).
-            ctx.fillStyle = this.backgroundColor;
-            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        this.render = function(imageData, progCb, finishCb) {
+            var i;
+            var length = imageData.data.length
+            var bgColor = this.backgroundColor;
+            var data = imageData.data;
 
-            this.backing = ctx.getImageData(
-                0, 0, ctx.canvas.width, ctx.canvas.height);
-            this.layerCanvas = document.createElement('canvas');
-            this.layerCanvas.width = ctx.canvas.width;
-            this.layerCanvas.height = ctx.canvas.height;
-            this.layerContext = this.layerCanvas.getContext('2d');
-            this.renderAt(ctx, 0, 0, 0, (new Date).valueOf() + Starfish.renderTimeout, progCb, finishCb);
+            this.imageData = imageData;
+
+            // Initialize it with the background color.
+            for (i=0; i < length; i += ELEMS_PER_PIXEL) {
+                data.set(bgColor, i);
+            }
+
+            this.renderAt(0, 0, 0, (new Date).valueOf() + Starfish.renderTimeout, progCb, finishCb);
         };
-        this.renderAt = function(ctx, lnum, x, y, timeout, progCb, finishCb) {
+        this.renderAt = function(lnum, x, y, timeout, progCb, finishCb) {
             // render for a while, but if we exceed |time| then
             // give a little grace to the UI by stopping and setting a
             // timeout so it can update, and not detect us as a runaway
             // script.
             var layers = this.layers;
-            var layerCanvas = this.layerCanvas;
-            var layerContext = this.layerContext;
             if (lnum < layers.length) {
                 var layerInfo = this.layers[lnum];
 
-                var newCoords = layerInfo.layer.drawSomeToCanvas(
-                    layerContext, layerInfo, x, y, timeout);
+                var newCoords = layerInfo.layer.drawSomeToImage(
+                    this.imageData, layerInfo, x, y, timeout);
                 x = newCoords.x; y = newCoords.y;
 
-                // Draw what we have so far
-                ctx.putImageData(this.backing, 0, 0);
-                ctx.drawImage(layerCanvas, 0, 0);
-
                 if (x == 0 && y == 0) {
-                    // Done with this layer, save it to backing and
-                    // start on the next layer.
-                    this.backing = ctx.getImageData(
-                        0, 0, ctx.canvas.width, ctx.canvas.height);
                     lnum++;
-
-                    // Re-initialize drawing canvas
-                    layerContext.clearRect(
-                        0, 0, layerCanvas.width, layerCanvas.height);
                 }
             }
 
@@ -366,11 +358,11 @@ var Starfish = new (function () {
                     progCb({
                         curLayer:       lnum+1
                       , numLayers:      layers.length
-                      , percentDone:    Math.floor(100 * y/ctx.canvas.height)
+                      , percentDone:    Math.floor(100 * y/this.imageData.height)
                     });
                 }
                 setTimeout(function() {
-                    self.renderAt(ctx, lnum, x, y, (new Date).valueOf()+Starfish.renderTimeout, progCb, finishCb);
+                    self.renderAt(lnum, x, y, (new Date).valueOf()+Starfish.renderTimeout, progCb, finishCb);
                 }, 250);
             }
         };

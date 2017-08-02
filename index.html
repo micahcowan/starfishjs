@@ -87,9 +87,11 @@
                     $('#render-info > div').css('display', 'none');
                     $('#render-info > p').html('Initializing layers...');
                     $('#render-info').css('display', 'block');
-                    instance.render(ctx,
+                    instance.render(
+                        ctx.getImageData(0, 0, canvas.width, canvas.height)
                         // callback for progress updates:
-                        function(info) {
+                      , function(info) {
+                            ctx.putImageData(instance.imageData, 0, 0);
                             $('#render-info > p')
                                 .html('Pattern generation in progress');
                             $('#inst-info, #layer-info').css('display', 'block');
@@ -109,6 +111,7 @@
                         }
                         // callback when complete:
                       , function() {
+                            ctx.putImageData(instance.imageData, 0, 0);
                             canvasToBackground();
                             $('.post-render').prop('disabled', false);
                             $('#render-info').slideUp();
