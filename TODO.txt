@@ -1,18 +1,8 @@
 TODO
 
-- Convert starfishjs to be more platform-agnostic library-like
-  x Convert as much of the code as possible to work directly with image
-    buffer data, not canvas contexts. Don't require the image buffer
-    data to have actually come from an Image object.
-    . References that should be gone when we're done: ctx,
-      this.layerCanvas, this.backing,  drawSomeToCanvas,
-      drawToCanvas
-      renderAt: layerCanvas, layerContext
-    . Be sure to pass ImageData.data.buffer (along with offset and
-    length) to node Buffer constructor
-- build a node CLI image generator, using "node-png"?
+- implement option parsing in cli.js
 - implement a wallpaper-setting feature (use npm's "wallpaper"?)
-- give finer control over layers, etc.
+- give finer control over layers, etc., and reproducible config
 - Make cloud-layer generator infinitely fine-grained (seeded/replayable
   PRNG?)
 - Make various constants in starfish.js more configurable (via args to
