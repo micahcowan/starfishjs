@@ -24,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/micahcowan/starfishjs/issues"
   },
-  "homepage": "http://micah.cowan.name/starfishjs/"
+  "homepage": "http://micah.cowan.name/starfishjs/",
+  "dependencies": {
+    "node-png": "^0.4.3"
+  }
 }
