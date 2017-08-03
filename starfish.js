@@ -20,21 +20,23 @@ function handleError(e) {
 }
 
 function startRender() {
-    const generators = [
-        'sf-bubble.js'
-      , 'sf-coswave.js'
-      , 'sf-flatwave.js'
-      , 'sf-rangefrac.js'
-      , 'sf-spinflake.js'
-    ];
-    for (let gen of generators) {
-        let mod = require(`./lib/generators/${gen}`);
-        mod.registerLayer(Starfish);
-    }
+    loadGenerators();
 
     let inst = new Starfish.Instance;
 
     inst.render(png, handleRenderProgress, writeToImageFile);
+}
+
+function loadGenerators() {
+    let dir = fs.readdirSync('./lib/generators/');
+    let genRe = /^sf-.*\.js$/;
+    for (let entry of dir) {
+        if (genRe.test(entry)) {
+            console.log(`Registering generator: ${entry}...`);
+            let mod = require(`./lib/generators/${entry}`);
+            mod.registerLayer(Starfish);
+        }
+    }
 }
 
 function handleRenderProgress(kw) {
