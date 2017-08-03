@@ -1,7 +1,7 @@
 {
   "name": "starfishjs",
   "version": "1.0.0",
-  "description": "Randomly generates beautiful, seamlessly tiled wallpapers.",
+  "description": "Procedurally generates beautiful, seamlessly tiled wallpapers.",
   "main": "lib/sf.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -26,6 +26,7 @@
   },
   "homepage": "http://micah.cowan.name/starfishjs/",
   "dependencies": {
-    "node-png": "^0.4.3"
+    "node-png": "^0.4.3",
+    "yargs": "^8.0.2"
   }
 }
