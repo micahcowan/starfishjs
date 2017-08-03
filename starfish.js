@@ -57,6 +57,14 @@ function parseOptions() {
             }
         })
         .version()
+        .options({
+            wallpaper: {
+                alias: 'w'
+              , description: 'Set the finished image as the desktop background'
+              , 'default': false
+              , 'type': 'boolean'
+            }
+        })
         .alias('help', 'h')
         .alias('version', 'V')
         .strict()
@@ -95,7 +103,6 @@ function loadGenerators() {
     let genRe = /^sf-.*\.js$/;
     for (let entry of dir) {
         if (genRe.test(entry)) {
-            verbose(`Registering generator: ${entry}...`);
             let mod = require(`./lib/generators/${entry}`);
             mod.registerLayer(Starfish);
         }
@@ -118,8 +125,16 @@ function writeToImageFile() {
            , () => {
                verbose(`Finished writing ${util.inspect(opts.output)}`
                        + ` [${opts.size[0]}x${opts.size[1]}].`);
+               maybeSetWallpaper();
            }
           );
     png.on('error', handleError);
     png.pack().pipe(outFile);
+}
+
+function maybeSetWallpaper() {
+    if (!opts.wallpaper) return;
+    verbose('Setting wallpaper...');
+    //require('wallpaper').set(opts.output, {scale: 'tile'});
+    require('wallpaper').set(opts.output);
 }

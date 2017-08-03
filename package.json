@@ -28,5 +28,8 @@
   "dependencies": {
     "node-png": "^0.4.3",
     "yargs": "^8.0.2"
+  },
+  "optionalDependencies": {
+    "wallpaper": "^2.5.0"
   }
 }

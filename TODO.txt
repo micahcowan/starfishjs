@@ -1,8 +1,7 @@
 TODO
 
-- reorganize repo file layouts
-- implement option parsing in cli.js
-- implement a wallpaper-setting feature (use npm's "wallpaper"?)
+/ implement a wallpaper-setting feature (use npm's "wallpaper"?)
+    . Can't set the wallpaper to "tiled"
 - make implementation more nodejs Stream-like, perhaps?
 - give finer control over layers, etc., and reproducible config
 - Make cloud-layer generator infinitely fine-grained (seeded/replayable
