@@ -60,7 +60,7 @@ function parseOptions() {
         .options({
             wallpaper: {
                 alias: 'w'
-              , description: 'Set the finished image as the desktop background'
+              , description: '[EXPERIMENTAL] Set the finished image as the desktop background'
               , 'default': false
               , 'type': 'boolean'
             }
