@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-let Starfish = require('./starfish.js').starfish;
+let Starfish = require('./lib/sf.js').starfish;
 let PNG = require('node-png').PNG;
 let png = new PNG({width: 384, height: 384, filterType: -1});
 let fs = require('fs');
@@ -21,14 +21,14 @@ function handleError(e) {
 
 function startRender() {
     const generators = [
-        './sf-bubble.js'
-      , './sf-coswave.js'
-      , './sf-flatwave.js'
-      , './sf-rangefrac.js'
-      , './sf-spinflake.js'
+        'sf-bubble.js'
+      , 'sf-coswave.js'
+      , 'sf-flatwave.js'
+      , 'sf-rangefrac.js'
+      , 'sf-spinflake.js'
     ];
     for (let gen of generators) {
-        let mod = require(gen);
+        let mod = require(`./lib/generators/${gen}`);
         mod.registerLayer(Starfish);
     }
 

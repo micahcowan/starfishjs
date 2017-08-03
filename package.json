@@ -2,7 +2,7 @@
   "name": "starfishjs",
   "version": "1.0.0",
   "description": "Randomly generates beautiful, seamlessly tiled wallpapers.",
-  "main": "starfish.js",
+  "main": "lib/sf.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

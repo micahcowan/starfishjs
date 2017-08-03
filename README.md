@@ -6,10 +6,10 @@ An HTML5/JavaScript port of my friend [Mars Saxman](http://redecho.org/)'s C pro
 StarfishJS (like its C predecesor) is Free/Libre Software, and is licensed under the [GNU GPL](LICENSE.txt) (version 3 or later).
 
 ### Samples ###
-![Test Image: "Turvey Green Cream Dunes"](turvey-green-cream-dunes.png)
-![Test Image: "Regal Age"](regal-age.png)
+![Test Image: "Turvey Green Cream Dunes"](images/sf/turvey-green-cream-dunes.png)
+![Test Image: "Regal Age"](images/sf/regal-age.png)
 
-If you want a little peak under the hood, you can see the individual image-generating algorithms at play: the three generators currently available are [Coswave][], [Spinflake][], [Rangefrac][], [Flatwave][], and [Bubble][].
+If you want a little peak under the hood, you can see the individual image-generating algorithms at play: the generators currently available are [Coswave][], [Spinflake][], [Rangefrac][], [Flatwave][], and [Bubble][].
 
   [coswave]: http://micah.cowan.name/starfishjs/#!test=Coswave
   [spinflake]: http://micah.cowan.name/starfishjs/#!test=Spinflake
