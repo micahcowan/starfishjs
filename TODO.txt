@@ -2,7 +2,10 @@ TODO
 
 / implement a wallpaper-setting feature (use npm's "wallpaper"?)
     . Can't set the wallpaper to "tiled"
+    . Doesn't work when the new wallpaper has the same name(/path?) as
+      the previous one.
 - make implementation more nodejs Stream-like, perhaps?
+- retina support in web version (images at higher dpi)
 - give finer control over layers, etc., and reproducible config
 - Make cloud-layer generator infinitely fine-grained (seeded/replayable
   PRNG?)
