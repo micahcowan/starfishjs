@@ -20,7 +20,7 @@
     "desktop",
     "web"
   ],
-  "author": "Micah Cowan",
+  "author": "Micah Cowan <micah@addictivecode.org> (http://micah.cowan.name/)",
   "license": "GPL-3.0+",
   "bugs": {
     "url": "https://github.com/micahcowan/starfishjs/issues"
