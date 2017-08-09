@@ -69,6 +69,11 @@ function parseOptions() {
         .alias('help', 'h')
         .alias('version', 'V')
         .strict()
+        .example('$0 -v -s 720x720', '(Or just -s 720.) The -v option is recommended for interactive use in a command console.')
+        .example(
+            '$0 -o ~/wallpaper.png -w'
+          , 'Generate a wallpaper at ~/wallpaper.png, and set it as the current desktop wallpaper. Currently, there are a number of known issues with this feature, including that it can\'t set tiled mode (so it\'ll be either centered or stretched - ugly if it\'s much smaller than the desktop); and doesn\'t set all desktop backgrounds, only the current one.'
+        )
         .argv;
     if (opts._.length != 0) {
         error("program arguments are not accepted.", 2);
