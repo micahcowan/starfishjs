@@ -4,6 +4,7 @@ let Starfish = require('./lib/sf.js').starfish;
 let PNG = require('node-png').PNG;
 let fs = require('fs');
 let util = require('util');
+let path = require('path');
 
 let opts = parseOptions();
 let png = new PNG({width: opts.size[0], height: opts.size[1], filterType: -1});
@@ -99,7 +100,7 @@ function startRender() {
 }
 
 function loadGenerators() {
-    let dir = fs.readdirSync('./lib/generators/');
+    let dir = fs.readdirSync(path.join(__dirname, 'lib', 'generators'));
     let genRe = /^sf-.*\.js$/;
     for (let entry of dir) {
         if (genRe.test(entry)) {
