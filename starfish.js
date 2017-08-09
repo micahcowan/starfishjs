@@ -15,11 +15,11 @@ outFile.on('open', startRender);
 // Done.
 
 function verbose(msg) {
-    if (opts.verbose) console.log(msg);
+    if (opts.verbose) console.error(msg);
 }
 
 function verboseRaw(msg) {
-    if (opts.verbose) process.stdout.write(msg);
+    if (opts.verbose) process.stderr.write(msg);
 }
 
 function handleError(e) {
